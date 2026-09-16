@@ -21,7 +21,7 @@ Una Historia de Usuario se considera terminada cuando cumple con todos los sigui
 
 | Integrante | Firma |
 |---|---|
-| Shalom Sofia Vargas Muñoz | __________________ |
+| Shalom Sofia Vargas Muñoz | ___________Sofia Vargaz_______ |
 | Yeison Andres Cifuentes Reina | ______Yeison cifuentes___________ |
 | Jadith Milena Saenz Magallanes | ___Milena Saenz_____________ |
 | Kevin Andres Balanta Mezu | ________Kevin Balanta__________ |
