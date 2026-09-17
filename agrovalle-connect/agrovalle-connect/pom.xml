@@ -63,9 +63,15 @@
 			<artifactId>spring-boot-starter-webmvc-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
+<<<<<<< Updated upstream
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
@@ -74,4 +80,33 @@
 		</plugins>
 	</build>
 
+=======
+    <plugins>
+        <plugin>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-maven-plugin</artifactId>
+        </plugin>
+
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-checkstyle-plugin</artifactId>
+            <version>3.3.1</version>
+            <configuration>
+                <configLocation>checkstyle.xml</configLocation>
+                <consoleOutput>true</consoleOutput>
+                <failOnViolation>false</failOnViolation>
+            </configuration>
+            <executions>
+                <execution>
+                    <id>checkstyle-verify</id>
+                    <phase>verify</phase>
+                    <goals>
+                        <goal>check</goal>
+                    </goals>
+                </execution>
+            </executions>
+        </plugin>
+    </plugins>
+</build>
+>>>>>>> Stashed changes
 </project>

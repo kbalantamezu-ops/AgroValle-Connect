@@ -1,0 +1,15 @@
+// ...existing code...
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "Ejecutando pruebas y validación de estilo antes del commit..."
+
+cd "$(dirname "$0")/../agrovalle-connect" || exit 1
+mvn test && mvn checkstyle:check
+
+if [ $? -ne 0 ]; then
+  echo "El commit fue bloqueado: hay pruebas fallidas o advertencias de Checkstyle."
+  exit 1
+fi
+
+echo "Todo en orden, procediendo con el commit."
