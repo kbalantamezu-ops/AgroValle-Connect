@@ -8,3 +8,30 @@ build/
 .idea/
 *.iml
 .env
+HELP.md
+.mvn/wrapper/maven-wrapper.jar
+
+### IDE ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings/
+.springBeans
+.sts4-cache
+.idea/
+*.iws
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+### VS Code ###
+.vscode/
+
+### Node ###
+node_modules/
