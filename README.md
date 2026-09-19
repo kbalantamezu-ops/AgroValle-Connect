@@ -4,7 +4,7 @@
 ![Java](https://img.shields.io/badge/Java-17-orange)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.x-brightgreen)
 
-> El badge de build se activará automáticamente una vez se configure el pipeline de GitHub Actions (`.github/workflows/ci.yml`) en el Bloque 2.
+> El badge de build refleja el pipeline de GitHub Actions definido en `.github/workflows/ci.yml`.
 
 ## Visión del Producto
 
@@ -81,4 +81,6 @@ Ejemplo: `feat(estudiantes): implementar logica de validacion de correo instituc
 
 ## Calidad y Automatización
 
-Husky y Checkstyle reducen la deuda técnica antes de escribir lógica de negocio: el hook `.husky/pre-commit` corre `mvn test && mvn checkstyle:check` en cada commit, así que un error de estilo o una prueba rota nunca llega siquiera a quedar registrado en el historial local, mucho menos a un Pull Request. Esto evita que la revisión de código por pares se use para detectar errores triviales, y la deja libre para discutir diseño y lógica de negocio.
+Husky y Checkstyle reducen la deuda técnica antes de escribir lógica de negocio: el hook `.husky/pre-commit` ejecuta `./mvnw test` y `./mvnw checkstyle:check` en cada commit. El workflow `.github/workflows/ci.yml` ejecuta `./mvnw verify` en cada cambio de `main` y en cada Pull Request; además, JaCoCo exige una cobertura mínima del 60%.
+
+Para activar Husky localmente, cada integrante debe ejecutar `npm install` desde la raíz del repositorio.
