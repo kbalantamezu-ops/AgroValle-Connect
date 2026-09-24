@@ -11,7 +11,7 @@
 | HU-09 | Actualización de Stock tras Confirmación de Pedido | M | 5 |
 | HU-10 | Consultar el Estado de un Pedido | M | 3 |
 | HU-11 | Agregar Productos al Carrito | M | 5 |
-| HU-12 | Editar Perfil y Datos | S | 3 |
+| HU-12 | Registro de Usuario | S | 3 |
 | HU-13 | Búsqueda Inteligente por Municipio y Disponibilidad | M | 5 |
 | HU-14 | Notificaciones de Cambio de Estado del Pedido | S | 5 |
 | HU-15 | Panel de Gestión para el Agricultor | C | 8 |
@@ -143,14 +143,14 @@
 
 ---
 
-### HU-12: Editar Perfil y Datos
-**Historia:** Como Agricultor, quiero editar los datos de mi perfil y de mi finca para mantener actualizada mi información de contacto y ubicación.
+### HU-12: Registro de Usuario
+**Historia:** Como Usuario, quiero registrarme a la plataforma de ventas.
 **Priorización:** S (Should Have) — **Estimación:** 3 Points
 
 **Escenario BDD:**
-- **Given** que un agricultor autenticado tiene un perfil y una finca registrada en el sistema.
-- **When** el agricultor modifica campos como nombre, ubicación del Valle o medios de contacto y guarda los cambios.
-- **Then** el sistema valida los datos, actualiza el perfil en la base de datos y confirma el cambio al usuario.
+- **Given** que un usuario quiera registrarse e iniciar sesion.
+- **When** el usuario ingresa sus datos como nombre, ubicación del Valle, contraseña, etc.
+- **Then** el sistema valida los datos, crea el perfil en la base de datos y confirma el registro.
 
 ---
 
