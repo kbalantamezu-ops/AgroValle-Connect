@@ -31,7 +31,7 @@ El workflow de GitHub Actions repite `./mvnw verify` en cada Pull Request y en c
 
 | Integrante | Firma |
 |---|---|
-| Shalom Sofia Vargas Muñoz | ____Sofia Vargaz_______ |
+| Shalom Sofia Vargas Muñoz | ____Sofia Vargas_______ |
 | Yeison Andres Cifuentes Reina | ______Yeison cifuentes___________ |
 | Jadith Milena Saenz Magallanes | ___Milena Saenz_____________ |
 | Kevin Andres Balanta Mezu | ________Kevin Balanta__________ |
