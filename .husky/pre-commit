@@ -1,10 +1,9 @@
-// ...existing code...
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
 echo "Ejecutando pruebas y validación de estilo antes del commit..."
 
-cd "$(dirname "$0")/../agrovalle-connect" || exit 1
+cd "$(dirname "$0")/../agrovalle-connect/agrovalle-connect" || exit 1
 mvn test && mvn checkstyle:check
 
 if [ $? -ne 0 ]; then
