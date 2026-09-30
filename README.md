@@ -84,3 +84,34 @@ Ejemplo: `feat(estudiantes): implementar logica de validacion de correo instituc
 Husky y Checkstyle reducen la deuda técnica antes de escribir lógica de negocio: el hook `.husky/pre-commit` ejecuta `./mvnw test` y `./mvnw checkstyle:check` en cada commit. El workflow `.github/workflows/ci.yml` ejecuta `./mvnw verify` en cada cambio de `main` y en cada Pull Request; además, JaCoCo exige una cobertura mínima del 60%.
 
 Para activar Husky localmente, cada integrante debe ejecutar `npm install` desde la raíz del repositorio.
+
+
+
+## Tablero Kanban y Políticas Explícitas
+ 
+El equipo gestiona el flujo de trabajo del Sprint 1 en un tablero de **GitHub Projects** vinculado a este repositorio.
+ 
+**Tablero:** [URL del tablero en GitHub Projects](URL_DEL_TABLERO)
+ 
+### Columnas y límites de trabajo en progreso (WIP Limits)
+ 
+| Columna | Límite WIP | Regla de entrada | Regla de salida |
+|---|---|---|---|
+| **Product Backlog** | Sin límite | Historia de Usuario (HU) con prioridad MoSCoW y puntos Fibonacci asignados | La HU se selecciona en el Sprint Planning |
+| **Sprint Backlog (To Do)** | Sin límite | Tarea técnica de máximo 8 horas, vinculada a su HU como sub-issue | Un integrante la toma y crea su rama `feature/*` |
+| **In Progress** | **Máximo 3 tareas** | La tarea tiene un responsable y una rama corta (`feature/HUxx-nombre`) | Se abre el Pull Request |
+| **Code Review / Testing** | **Máximo 2 Pull Requests** | PR abierto, con `mvn test` y `mvn checkstyle:check` pasando en local | Aprobación explícita de un revisor |
+| **Done** | Sin límite | 1 aprobación (Approve), pruebas JUnit 5 en verde y 0 errores de Checkstyle | Merge a `main` |
+ 
+### Políticas explícitas
+ 
+1. **Regla de Done:** Ninguna tarjeta se mueve a *Done* si el Pull Request no cuenta con la aprobación de al menos un revisor (Peer Review), las pruebas JUnit 5 pasando y 0 errores de Checkstyle.
+2. **Cumplimiento del DoD:** Toda tarjeta en *Done* cumple el Definition of Done definido en [`docs/dod.md`](docs/dod.md).
+3. **Respeto del WIP:** Si una columna alcanza su límite, ningún integrante toma una tarjeta nueva hasta que se libere un cupo. Primero se apoya en terminar el trabajo en curso.
+4. **Flujo sin saltos:** Ninguna tarjeta omite columnas. Todas pasan por *Code Review / Testing* antes de *Done*.
+5. **Revisión cruzada:** Ningún integrante aprueba su propio Pull Request. El revisor es siempre una persona distinta al autor.
+6. **Contenido del Pull Request:** Cada PR describe los escenarios BDD probados y adjunta evidencia de las pruebas ejecutadas.
+7. **Convención de ramas y commits:** Cada tarea se desarrolla en una rama corta (`feature/HUxx-nombre`) y los commits siguen Conventional Commits (`feat`, `fix`, `test`).
+8. **Unidad de trabajo del tablero:** Las tarjetas que avanzan por las columnas son las tareas técnicas (`T-xx.xx`). Las HUs se consideran terminadas cuando todas sus sub-issues están en *Done*.
+ 
+
