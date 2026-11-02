@@ -32,12 +32,12 @@
 			<artifactId>spring-boot-starter-webmvc</artifactId>
 		</dependency>
 
-		<!-- NUEVO: BCryptPasswordEncoder y PasswordEncoder (sin activar Spring Security completo) -->
+		<!-- BCryptPasswordEncoder y PasswordEncoder (sin activar Spring Security completo) -->
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-crypto</artifactId>
 		</dependency>
-		<!-- NUEVO: @Getter, @Setter, @Builder y @NoArgsConstructor de entidades y DTO -->
+		<!-- @Getter, @Setter, @Builder y @NoArgsConstructor de entidades y DTO -->
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
@@ -73,6 +73,20 @@
 
 	<build>
 		<plugins>
+			<!-- NUEVO: activa Lombok explícitamente (necesario en JDK 23 o superior) -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<annotationProcessorPaths>
+						<path>
+							<groupId>org.projectlombok</groupId>
+							<artifactId>lombok</artifactId>
+							<version>${lombok.version}</version>
+						</path>
+					</annotationProcessorPaths>
+				</configuration>
+			</plugin>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
