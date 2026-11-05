@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgroValle Connect - Mis pedidos</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <header class="nav">
+        <a class="marca" href="/">
+            <span class="logo">AV</span>
+            <span>AgroValle Connect</span>
+        </a>
+        <nav class="enlaces">
+            <a href="/">Catálogo</a>
+            <a href="/publicar.html">Publicar</a>
+            <a href="/pedidos.html" class="activo">Mis pedidos</a>
+        </nav>
+    </header>
+
+    <main class="contenedor">
+        <h2 class="seccion-titulo">Consulta el estado de tus pedidos</h2>
+
+        <div class="filtros">
+            <input type="number" id="buscarPedidoId" placeholder="Número de pedido (ej: 3)"
+                   min="1" style="width: 220px;">
+            <button class="btn btn-primario" type="button" id="btnBuscarPedido">Consultar pedido</button>
+            <button class="btn btn-secundario" type="button" id="btnListarPedidos">Ver todos los pedidos</button>
+        </div>
+
+        <div id="contenidoPedidos">
+            <div class="cargando">Busca un pedido por número o consulta el listado completo.</div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        AgroValle Connect - Conectando la oferta agrícola del Valle del Cauca con Cali.
+    </footer>
+
+    <script type="module" src="/js/pedidos.js"></script>
+</body>
+</html>

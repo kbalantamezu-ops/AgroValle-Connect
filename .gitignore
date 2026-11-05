@@ -35,3 +35,6 @@ HELP.md
 
 ### Node ###
 node_modules/
+
+### Local ###
+bin/
