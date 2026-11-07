@@ -38,6 +38,51 @@ El Valle del Cauca es una despensa agrícola con municipios de alta vocación ag
 - **Calidad**: Checkstyle (Google Java Style), JUnit 5 + JaCoCo (cobertura mínima 60%)
 - **Automatización**: Husky (pre-commit hooks)
 
+## Cómo ejecutar
+
+```bash
+# Desarrollo (base de datos H2 en memoria + datos de ejemplo)
+./mvnw spring-boot:run
+
+# Producción / integración con PostgreSQL
+./mvnw spring-boot:run -Dspring-boot.run.profiles=postgres
+
+# Verificación completa (checkstyle + tests + cobertura)
+./mvnw verify
+```
+
+La aplicación queda disponible en `http://localhost:8080`:
+
+| Página | Descripción |
+| --- | --- |
+| `/` | Catálogo con búsqueda inteligente, filtros por municipio/categoría/disponibilidad, precios promedio regionales, carrito de compra, contacto directo con el productor y reseñas. |
+| `/publicar.html` | Registro de agricultores y publicación de productos. |
+| `/pedidos.html` | Consulta del estado de un pedido, línea de tiempo, avance de estado y notificaciones. |
+
+La consola de H2 está disponible en `/h2-console` (JDBC URL `jdbc:h2:mem:agrovalle`, usuario `sa`).
+
+## API REST (`/api/v1`)
+
+| Método | Endpoint | Historia de Usuario |
+| --- | --- | --- |
+| `POST` | `/agricultores` | HU-01 Registro de Agricultores |
+| `GET` / `PUT` | `/agricultores`, `/agricultores/{id}` | HU-12 Editar Perfil |
+| `POST` | `/productos` | HU-02 Publicación de Productos |
+| `GET` | `/productos?q=&municipio=&categoria=&disponible=` | HU-04 / HU-13 Búsqueda y Filtros |
+| `GET` | `/precios/promedio?categoria=CAFE` | HU-03 Precios Regionales |
+| `POST` | `/pedidos` | HU-09 / HU-11 Pedido y Descuento de Stock |
+| `GET` | `/medios-pago` | HU-06 Medios de Pago |
+| `GET` | `/pedidos`, `/pedidos/{id}` | HU-10 Estado del Pedido |
+| `PATCH` | `/pedidos/{id}/estado` | HU-10 / HU-14 Cambio de Estado y Notificación |
+| `GET` | `/pedidos/{id}/notificaciones` | HU-14 Notificaciones |
+| `POST` / `GET` | `/resenas`, `/resenas?agricultorId=` | HU-08 Satisfacción y Reseñas |
+| `GET` | `/catalogo/municipios`, `/catalogo/categorias` | Catálogo del Valle |
+
+Los errores siguen el formato `{ timestamp, status, error, message, path, fieldErrors }`.
+Cada pedido queda asociado a las tablas del DER `MEDIOS_PAGO` (efectivo, transferencia, tarjeta) y `PAGOS`
+(monto `NUMERIC(12,2)`, estado y fecha de pago); el medio se selecciona al confirmar el pedido (HU-06).
+
+
 ## Estrategia de Ramas: GitFlow
 
 Elegimos **GitFlow** porque el proyecto está pensado para entregas versionadas a lo largo del curso (incrementos funcionales por sesión) y no para despliegue continuo diario. GitFlow nos da ramas aisladas por funcionalidad y por release, lo que:

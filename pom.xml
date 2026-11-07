@@ -67,7 +67,7 @@
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
-			<scope>test</scope>
+			<scope>runtime</scope>
 		</dependency>
 	</dependencies>
 
@@ -152,7 +152,12 @@
 						</goals>
 						<configuration>
 							<excludes>
+
+								<exclude>**/AgrovalleConnectApplication.class</exclude>
+								<exclude>**/DataInitializer.class</exclude>
+
 								<exclude>**/*Application.class</exclude>
+
 							</excludes>
 							<rules>
 								<rule>
