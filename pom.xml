@@ -152,12 +152,12 @@
 						</goals>
 						<configuration>
 							<excludes>
-<<<<<<< HEAD
+
 								<exclude>**/AgrovalleConnectApplication.class</exclude>
 								<exclude>**/DataInitializer.class</exclude>
-=======
+
 								<exclude>**/*Application.class</exclude>
->>>>>>> origin/develop
+
 							</excludes>
 							<rules>
 								<rule>
