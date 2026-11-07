@@ -1,13 +1,20 @@
 package com.agrovalle.agrovalle_connect.agricultores;
 
+<<<<<<< HEAD
 import com.agrovalle.agrovalle_connect.comun.ApiException;
 import com.agrovalle.agrovalle_connect.resenas.ResenaRepository;
 import java.util.List;
 import org.springframework.http.HttpStatus;
+=======
+import com.agrovalle.agrovalle_connect.excepciones.ReglaNegocioException;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
+>>>>>>> origin/develop
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+<<<<<<< HEAD
 public class AgricultorService {
 
     private final AgricultorRepository agricultorRepository;
@@ -63,4 +70,26 @@ public class AgricultorService {
                 agricultor.getMunicipio().name(), agricultor.getTelefono(), agricultor.getEmail(),
                 agricultor.getFinca(), agricultor.getFechaRegistro(), promedio);
     }
+=======
+@RequiredArgsConstructor
+public class AgricultorService {
+
+  private final AgricultorRepository repositorio;
+  private final AgricultorMapper mapper;
+  private final PasswordEncoder passwordEncoder;
+
+  /** HU-01: registra un agricultor validando que cédula y correo no existan. */
+  @Transactional
+  public AgricultorResponse registrar(AgricultorRequest request) {
+    if (repositorio.existsByCedula(request.cedula())) {
+      throw new ReglaNegocioException("Ya existe un agricultor con esa cédula");
+    }
+    if (repositorio.existsByEmail(request.email())) {
+      throw new ReglaNegocioException("Ya existe un agricultor con ese correo");
+    }
+    String hash = passwordEncoder.encode(request.password());
+    Agricultor guardado = repositorio.save(mapper.toEntity(request, hash));
+    return mapper.toResponse(guardado);
+  }
+>>>>>>> origin/develop
 }
