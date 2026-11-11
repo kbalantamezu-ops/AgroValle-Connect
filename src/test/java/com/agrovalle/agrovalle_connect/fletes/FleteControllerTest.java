@@ -45,7 +45,7 @@ class FleteControllerTest {
     when(servicio.calcular(any(FleteRequest.class)))
         .thenReturn(new FleteResponse("Palmira", "CERCANA", new BigDecimal("10"), new BigDecimal("8000.00")));
 
-    mockMvc.perform(post("/api/fletes/calcular").contentType(MediaType.APPLICATION_JSON).content(JSON_VALIDO))
+    mockMvc.perform(post("/api/v1/fletes/calcular").contentType(MediaType.APPLICATION_JSON).content(JSON_VALIDO))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.zona").value("CERCANA"))
         .andExpect(jsonPath("$.costo").value(8000.00));
@@ -55,7 +55,7 @@ class FleteControllerTest {
   void postConPesoInvalidoDevuelve400() throws Exception {
     String json = "{\"municipio\":\"Palmira\",\"pesoKg\":0}";
 
-    mockMvc.perform(post("/api/fletes/calcular").contentType(MediaType.APPLICATION_JSON).content(json))
+    mockMvc.perform(post("/api/v1/fletes/calcular").contentType(MediaType.APPLICATION_JSON).content(json))
         .andExpect(status().isBadRequest());
 
     verifyNoInteractions(servicio);
@@ -66,7 +66,7 @@ class FleteControllerTest {
     when(servicio.calcular(any(FleteRequest.class)))
         .thenThrow(new RecursoNoEncontradoException("No hay tarifa de flete para el municipio Palmira"));
 
-    mockMvc.perform(post("/api/fletes/calcular").contentType(MediaType.APPLICATION_JSON).content(JSON_VALIDO))
+    mockMvc.perform(post("/api/v1/fletes/calcular").contentType(MediaType.APPLICATION_JSON).content(JSON_VALIDO))
         .andExpect(status().isNotFound());
   }
 }
