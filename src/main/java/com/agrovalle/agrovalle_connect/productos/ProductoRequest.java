@@ -1,18 +1,12 @@
 package com.agrovalle.agrovalle_connect.productos;
 
-<<<<<<< HEAD
 import com.agrovalle.agrovalle_connect.catalogo.Categoria;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.FutureOrPresent;
-=======
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.Min;
->>>>>>> origin/develop
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
-<<<<<<< HEAD
 import java.time.LocalDate;
 
 public record ProductoRequest(
@@ -34,17 +28,4 @@ public record ProductoRequest(
         LocalDate fechaCosecha,
         @NotNull(message = "El agricultor es obligatorio")
         Long agricultorId) {
-=======
-
-/** Datos de entrada para publicar un producto. El agricultor llega en el cuerpo (sin JWT por ahora). */
-public record ProductoRequest(
-    @NotNull Long agricultorId,
-    @NotNull Long categoriaId,
-    @NotBlank @Size(max = 120) String nombre,
-    @Size(max = 500) String descripcion,
-    @NotNull @DecimalMin(value = "0.01", message = "debe ser mayor que cero") BigDecimal precio,
-    @NotNull @Min(1) Integer cantidadDisponible,
-    @NotBlank @Size(max = 30) String unidad,
-    @Size(max = 500) String fotoUrl) {
->>>>>>> origin/develop
 }

@@ -1,5 +1,7 @@
 package com.agrovalle.agrovalle_connect.comun;
 
+import com.agrovalle.agrovalle_connect.excepciones.RecursoNoEncontradoException;
+import com.agrovalle.agrovalle_connect.excepciones.ReglaNegocioException;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
@@ -20,6 +22,18 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ApiException.class)
     public ResponseEntity<ApiError> manejarApiException(ApiException ex, HttpServletRequest request) {
         return construir(ex.getStatus(), ex.getMessage(), request, null);
+    }
+
+    @ExceptionHandler(RecursoNoEncontradoException.class)
+    public ResponseEntity<ApiError> manejarNoEncontrado(RecursoNoEncontradoException ex,
+            HttpServletRequest request) {
+        return construir(HttpStatus.NOT_FOUND, ex.getMessage(), request, null);
+    }
+
+    @ExceptionHandler(ReglaNegocioException.class)
+    public ResponseEntity<ApiError> manejarReglaNegocio(ReglaNegocioException ex,
+            HttpServletRequest request) {
+        return construir(HttpStatus.CONFLICT, ex.getMessage(), request, null);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

@@ -1,7 +1,6 @@
 package com.agrovalle.agrovalle_connect.productos;
 
 import com.agrovalle.agrovalle_connect.agricultores.Agricultor;
-<<<<<<< HEAD
 import com.agrovalle.agrovalle_connect.agricultores.AgricultorService;
 import com.agrovalle.agrovalle_connect.catalogo.Categoria;
 import com.agrovalle.agrovalle_connect.catalogo.Municipio;
@@ -9,16 +8,10 @@ import com.agrovalle.agrovalle_connect.comun.ApiException;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.http.HttpStatus;
-=======
-import com.agrovalle.agrovalle_connect.agricultores.AgricultorRepository;
-import com.agrovalle.agrovalle_connect.excepciones.RecursoNoEncontradoException;
-import lombok.RequiredArgsConstructor;
->>>>>>> origin/develop
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-<<<<<<< HEAD
 public class ProductoService {
 
     private final ProductoRepository productoRepository;
@@ -74,26 +67,4 @@ public class ProductoService {
                 producto.getFechaCosecha(), producto.getFechaPublicacion(), producto.isDisponible(),
                 agricultor.getMunicipio().name(), resumen);
     }
-=======
-@RequiredArgsConstructor
-public class ProductoService {
-
-  private final ProductoRepository productoRepositorio;
-  private final AgricultorRepository agricultorRepositorio;
-  private final CategoriaRepository categoriaRepositorio;
-  private final ProductoMapper mapper;
-
-  /** HU-02: publica un producto de un agricultor existente en una categoría existente. */
-  @Transactional
-  public ProductoResponse publicar(ProductoRequest request) {
-    Agricultor agricultor = agricultorRepositorio.findById(request.agricultorId())
-        .orElseThrow(() -> new RecursoNoEncontradoException(
-            "No existe el agricultor con id " + request.agricultorId()));
-    Categoria categoria = categoriaRepositorio.findById(request.categoriaId())
-        .orElseThrow(() -> new RecursoNoEncontradoException(
-            "No existe la categoría con id " + request.categoriaId()));
-    Producto guardado = productoRepositorio.save(mapper.toEntity(request, agricultor, categoria));
-    return mapper.toResponse(guardado);
-  }
->>>>>>> origin/develop
 }

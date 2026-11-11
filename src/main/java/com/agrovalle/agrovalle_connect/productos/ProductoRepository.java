@@ -1,6 +1,5 @@
 package com.agrovalle.agrovalle_connect.productos;
 
-<<<<<<< HEAD
 import com.agrovalle.agrovalle_connect.catalogo.Categoria;
 import com.agrovalle.agrovalle_connect.catalogo.Municipio;
 import java.util.List;
@@ -27,9 +26,4 @@ public interface ProductoRepository extends JpaRepository<Producto, Long> {
     Optional<Producto> buscarPorId(@Param("id") Long id);
 
     List<Producto> findByCategoria(Categoria categoria);
-=======
-import org.springframework.data.jpa.repository.JpaRepository;
-
-public interface ProductoRepository extends JpaRepository<Producto, Long> {
->>>>>>> origin/develop
 }
