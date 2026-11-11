@@ -2,9 +2,12 @@
 
 ![Build Status](https://img.shields.io/github/actions/workflow/status/kbalantamezu-ops/AgroValle-Connect/ci.yml?branch=main&label=build)
 ![Java](https://img.shields.io/badge/Java-17-orange)
-![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.x-brightgreen)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.1-brightgreen)
+![Tests](https://img.shields.io/badge/tests-73%20passing-success)
+![Coverage](https://img.shields.io/badge/coverage-79%25%20instructions-success)
 
 > El badge de build refleja el pipeline de GitHub Actions definido en `.github/workflows/ci.yml`.
+> Estado verificado: `./mvnw clean verify` en verde, Checkstyle sin violaciones y cobertura superior al 60%.
 
 ## Visión del Producto
 
@@ -21,7 +24,8 @@ El Valle del Cauca es una despensa agrícola con municipios de alta vocación ag
 - **Productores y Ofertas**: registro de fincas por municipio y publicación de cosechas disponibles (cantidad, precio, categoría, fecha estimada de recolección).
 - **Catálogo y Búsqueda Inteligente**: filtrado de la oferta por municipio de origen y disponibilidad.
 - **Pedidos Directos y Stock**: reserva de inventario, carrito de compra y órdenes de compra directas.
-- **Logística y Trazabilidad**: confirmación de alistamiento y seguimiento en tiempo real del despacho.
+- **Logística y Trazabilidad**: cálculo de fletes por zona y seguimiento del estado del despacho.
+- **Panel del Agricultor**: publicaciones, pedidos recibidos y ventas acumuladas en un solo lugar.
 
 ## Integrantes del equipo
 
@@ -32,23 +36,50 @@ El Valle del Cauca es una despensa agrícola con municipios de alta vocación ag
 
 ## Stack Tecnológico
 
-- **Backend**: Java 17, Spring Boot, Maven
-- **Base de datos**: PostgreSQL
-- **Arquitectura**: patrón MVC (/models, /views, /controllers)
-- **Calidad**: Checkstyle (Google Java Style), JUnit 5 + JaCoCo (cobertura mínima 60%)
-- **Automatización**: Husky (pre-commit hooks)
+- **Backend**: Java 17, Spring Boot 4.1.1, Spring Data JPA, Maven
+- **Base de datos**: PostgreSQL en el perfil `postgres`; H2 en memoria para desarrollo y pruebas
+- **Frontend**: HTML5, CSS3 y JavaScript vanilla servidos desde `src/main/resources/static`
+- **Arquitectura**: MVC por capas (`controller` → `service` → `repository` → `entity`), con DTOs y patrones Strategy/Factory en fletes
+- **Calidad**: Checkstyle (Google Java Style), JUnit 5 + MockMvc + JaCoCo (cobertura mínima 60%)
+- **Automatización**: GitHub Actions y Husky (pre-commit hooks)
+
+### Organización del código
+
+```text
+src/main/java/com/agrovalle/agrovalle_connect/
+├── agricultores/   # HU-01, HU-12, HU-15
+├── catalogo/       # Municipios y categorías
+├── comun/          # Manejo de errores, CORS y respuestas API
+├── config/         # Seguridad y datos de ejemplo
+├── fletes/         # HU-07 y patrón Strategy
+├── pagos/          # HU-06
+├── pedidos/        # HU-09, HU-10, HU-11, HU-14
+├── productos/      # HU-02, HU-03, HU-04, HU-13
+├── resenas/        # HU-08
+└── usuarios/       # Registro de compradores
+```
 
 ## Cómo ejecutar
 
 ```bash
-# Desarrollo (base de datos H2 en memoria + datos de ejemplo)
+# Desarrollo (H2 en memoria + datos de ejemplo)
 ./mvnw spring-boot:run
 
-# Producción / integración con PostgreSQL
+# Perfil PostgreSQL (requiere una base de datos disponible)
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=postgres
 
-# Verificación completa (checkstyle + tests + cobertura)
-./mvnw verify
+# Verificación completa (Checkstyle + tests + cobertura)
+./mvnw clean verify
+
+# Empaquetar y ejecutar el JAR
+./mvnw clean package
+java -jar target/agrovalle-connect-1.0.0.jar
+```
+
+También se puede levantar todo con Docker Compose:
+
+```bash
+docker compose up --build
 ```
 
 La aplicación queda disponible en `http://localhost:8080`:
@@ -58,8 +89,19 @@ La aplicación queda disponible en `http://localhost:8080`:
 | `/` | Catálogo con búsqueda inteligente, filtros por municipio/categoría/disponibilidad, precios promedio regionales, carrito de compra, contacto directo con el productor y reseñas. |
 | `/publicar.html` | Registro de agricultores y publicación de productos. |
 | `/pedidos.html` | Consulta del estado de un pedido, línea de tiempo, avance de estado y notificaciones. |
+| `/panel.html` | Panel del agricultor con publicaciones, pedidos recibidos y ventas acumuladas (HU-15). |
 
 La consola de H2 está disponible en `/h2-console` (JDBC URL `jdbc:h2:mem:agrovalle`, usuario `sa`).
+
+### Variables de entorno
+
+| Variable | Valor por defecto | Descripción |
+| --- | --- | --- |
+| `SPRING_PROFILES_ACTIVE` | `default` | Usa `postgres` para conectar con PostgreSQL |
+| `SPRING_DATASOURCE_URL` | `jdbc:postgresql://localhost:5432/agrovalle` | URL de la base de datos |
+| `SPRING_DATASOURCE_USERNAME` | `postgres` | Usuario de la base de datos |
+| `SPRING_DATASOURCE_PASSWORD` | `postgres` | Contraseña de la base de datos |
+| `APP_CORS_ALLOWED_ORIGINS` | `http://localhost:8080` | Orígenes permitidos, separados por coma |
 
 ## API REST (`/api/v1`)
 
@@ -67,6 +109,7 @@ La consola de H2 está disponible en `/h2-console` (JDBC URL `jdbc:h2:mem:agrova
 | --- | --- | --- |
 | `POST` | `/agricultores` | HU-01 Registro de Agricultores |
 | `GET` / `PUT` | `/agricultores`, `/agricultores/{id}` | HU-12 Editar Perfil |
+| `GET` | `/agricultores/{id}/panel` | HU-15 Panel del Agricultor |
 | `POST` | `/productos` | HU-02 Publicación de Productos |
 | `GET` | `/productos?q=&municipio=&categoria=&disponible=` | HU-04 / HU-13 Búsqueda y Filtros |
 | `GET` | `/precios/promedio?categoria=CAFE` | HU-03 Precios Regionales |
@@ -77,11 +120,27 @@ La consola de H2 está disponible en `/h2-console` (JDBC URL `jdbc:h2:mem:agrova
 | `GET` | `/pedidos/{id}/notificaciones` | HU-14 Notificaciones |
 | `POST` / `GET` | `/resenas`, `/resenas?agricultorId=` | HU-08 Satisfacción y Reseñas |
 | `GET` | `/catalogo/municipios`, `/catalogo/categorias` | Catálogo del Valle |
+| `POST` | `/fletes/calcular` | HU-07 Cálculo de Transporte |
+| `POST` | `/usuarios` | HU-12 Registro de Compradores |
 
 Los errores siguen el formato `{ timestamp, status, error, message, path, fieldErrors }`.
 Cada pedido queda asociado a las tablas del DER `MEDIOS_PAGO` (efectivo, transferencia, tarjeta) y `PAGOS`
 (monto `NUMERIC(12,2)`, estado y fecha de pago); el medio se selecciona al confirmar el pedido (HU-06).
 
+### Alcance actual y siguientes pasos
+
+Implementado y verificado:
+
+- Registro de agricultores y compradores, catálogo, filtros, precios promedio, carrito y pedidos.
+- Descuento automático de stock, estados, notificaciones, reseñas y panel del agricultor.
+- Cálculo de fletes con patrón Strategy y datos de ejemplo para desarrollo.
+
+Siguientes pasos recomendados:
+
+- Autenticación y autorización con JWT para asociar pedidos y publicaciones a un usuario real.
+- Migraciones de base de datos con Flyway o Liquibase para reemplazar `ddl-auto=update`.
+- Restringir el listado global de pedidos y el cambio de estado según el rol autenticado.
+- Integrar el costo de flete en el checkout y desplegar la aplicación en un entorno público.
 
 ## Estrategia de Ramas: GitFlow
 
@@ -134,9 +193,11 @@ Para activar Husky localmente, cada integrante debe ejecutar `npm install` desde
 
 ## Tablero Kanban y Políticas Explícitas
  
-El equipo gestiona el flujo de trabajo del Sprint 1 en un tablero de **GitHub Projects** vinculado a este repositorio.
- 
-**Tablero:** [URL del tablero en GitHub Projects](URL_DEL_TABLERO)
+El equipo gestiona el flujo de trabajo de cada sprint en un tablero de **GitHub Projects** vinculado a este repositorio.
+
+**Tablero:** [GitHub Projects del repositorio](https://github.com/kbalantamezu-ops/AgroValle-Connect/projects)
+
+**Issues:** [Historias de usuario y tareas](https://github.com/kbalantamezu-ops/AgroValle-Connect/issues)
  
 ### Columnas y límites de trabajo en progreso (WIP Limits)
  

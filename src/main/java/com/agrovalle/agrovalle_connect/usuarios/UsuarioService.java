@@ -11,7 +11,9 @@ import org.springframework.transaction.annotation.Transactional;
 public class UsuarioService {
 
   private final UsuarioRepository repositorio;
+
   private final UsuarioMapper mapper;
+
   private final PasswordEncoder passwordEncoder;
 
   /** HU-12: registra un usuario comprador validando que el correo no exista. */

@@ -882,6 +882,36 @@ a {
     padding: 2rem;
 }
 
+/* Panel del agricultor */
+.resumen-panel {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    margin: 1.5rem 0;
+}
+
+.tarjeta-resumen {
+    background: var(--blanco);
+    border: 1px solid var(--verde-100);
+    border-radius: 12px;
+    padding: 1.2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+}
+
+.tarjeta-resumen .numero {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--verde-700);
+}
+
+.tarjeta-resumen .etiqueta {
+    color: var(--gris);
+    font-size: 0.9rem;
+}
+
 @media (max-width: 640px) {
     .nav {
         flex-wrap: wrap;
