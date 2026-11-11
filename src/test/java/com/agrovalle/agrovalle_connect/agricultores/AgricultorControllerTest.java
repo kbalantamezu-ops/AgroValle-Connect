@@ -83,6 +83,25 @@ class AgricultorControllerTest extends BaseIntegracion {
     }
 
     @Test
+    void panelRetornaResumenDelAgricultor() throws Exception {
+        long id = registrar("Panel Test", "77000004", "PALMIRA");
+        mockMvc.perform(get("/api/v1/agricultores/" + id + "/panel"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.agricultor.id").value(id))
+                .andExpect(jsonPath("$.agricultor.nombre").value("Panel Test"))
+                .andExpect(jsonPath("$.productos").isArray())
+                .andExpect(jsonPath("$.pedidos").isArray())
+                .andExpect(jsonPath("$.pedidosRecibidos").isNumber())
+                .andExpect(jsonPath("$.ventasTotales").exists());
+    }
+
+    @Test
+    void panelDeAgricultorInexistenteRetorna404() throws Exception {
+        mockMvc.perform(get("/api/v1/agricultores/999999/panel"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
     void actualizarPerfilRetorna200() throws Exception {
         long id = registrar("Para Editar", "77000003", "SEVILLA");
         mockMvc.perform(put("/api/v1/agricultores/" + id)

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgroValle Connect - Panel del agricultor</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <header class="nav">
+        <a class="marca" href="/">
+            <span class="logo">AV</span>
+            <span>AgroValle Connect</span>
+        </a>
+        <nav class="enlaces">
+            <a href="/">Catálogo</a>
+            <a href="/publicar.html">Publicar</a>
+            <a href="/pedidos.html">Mis pedidos</a>
+            <a href="/panel.html" class="activo">Panel</a>
+        </nav>
+    </header>
+
+    <main class="contenedor">
+        <h2 class="seccion-titulo">Panel del agricultor</h2>
+        <p class="ayuda">Consulta tus publicaciones, pedidos recibidos y ventas en un solo lugar.</p>
+
+        <div class="filtros">
+            <select id="agricultorPanel" aria-label="Seleccionar agricultor">
+                <option value="">Cargando agricultores...</option>
+            </select>
+            <button class="btn btn-primario" type="button" id="btnCargarPanel">Ver panel</button>
+        </div>
+
+        <div id="contenidoPanel">
+            <div class="cargando">Selecciona un agricultor para consultar su panel.</div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        AgroValle Connect - Conectando la oferta agrícola del Valle del Cauca con Cali.
+    </footer>
+
+    <script type="module" src="/js/panel.js"></script>
+</body>
+</html>
