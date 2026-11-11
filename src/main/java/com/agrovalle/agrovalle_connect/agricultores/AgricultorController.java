@@ -18,8 +18,12 @@ public class AgricultorController {
 
     private final AgricultorService agricultorService;
 
-    public AgricultorController(AgricultorService agricultorService) {
+    private final PanelAgricultorService panelAgricultorService;
+
+    public AgricultorController(AgricultorService agricultorService,
+            PanelAgricultorService panelAgricultorService) {
         this.agricultorService = agricultorService;
+        this.panelAgricultorService = panelAgricultorService;
     }
 
     @PostMapping
@@ -40,5 +44,10 @@ public class AgricultorController {
     @PutMapping("/{id}")
     public AgricultorResponse actualizar(@PathVariable Long id, @Valid @RequestBody AgricultorRequest request) {
         return agricultorService.actualizar(id, request);
+    }
+
+    @GetMapping("/{id}/panel")
+    public PanelAgricultorResponse panel(@PathVariable Long id) {
+        return panelAgricultorService.obtener(id);
     }
 }

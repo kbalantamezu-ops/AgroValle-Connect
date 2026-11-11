@@ -9,8 +9,11 @@ import java.util.Set;
 public abstract class TarifaFleteBase implements EstrategiaFlete {
 
   private final String zona;
+
   private final BigDecimal tarifaBase;
+
   private final BigDecimal tarifaPorKilo;
+
   private final Set<String> municipios;
 
   protected TarifaFleteBase(String zona, BigDecimal tarifaBase, BigDecimal tarifaPorKilo, Set<String> municipios) {

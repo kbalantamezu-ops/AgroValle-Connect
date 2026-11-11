@@ -45,7 +45,7 @@ class UsuarioControllerTest {
     when(servicio.registrar(any(UsuarioRequest.class)))
         .thenReturn(new UsuarioResponse(7L, "Ana Gómez", "ana@correo.com", "3001234567"));
 
-    mockMvc.perform(post("/api/usuarios").contentType(MediaType.APPLICATION_JSON).content(JSON_VALIDO))
+    mockMvc.perform(post("/api/v1/usuarios").contentType(MediaType.APPLICATION_JSON).content(JSON_VALIDO))
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.id").value(7));
   }
@@ -54,7 +54,7 @@ class UsuarioControllerTest {
   void postConContrasenaCortaDevuelve400() throws Exception {
     String json = JSON_VALIDO.replace("clave1234", "corta");
 
-    mockMvc.perform(post("/api/usuarios").contentType(MediaType.APPLICATION_JSON).content(json))
+    mockMvc.perform(post("/api/v1/usuarios").contentType(MediaType.APPLICATION_JSON).content(json))
         .andExpect(status().isBadRequest());
 
     verifyNoInteractions(servicio);
@@ -65,7 +65,7 @@ class UsuarioControllerTest {
     when(servicio.registrar(any(UsuarioRequest.class)))
         .thenThrow(new ReglaNegocioException("Ya existe un usuario con ese correo"));
 
-    mockMvc.perform(post("/api/usuarios").contentType(MediaType.APPLICATION_JSON).content(JSON_VALIDO))
+    mockMvc.perform(post("/api/v1/usuarios").contentType(MediaType.APPLICATION_JSON).content(JSON_VALIDO))
         .andExpect(status().isConflict());
   }
 }

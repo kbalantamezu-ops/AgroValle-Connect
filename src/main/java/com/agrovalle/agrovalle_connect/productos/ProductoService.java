@@ -51,6 +51,12 @@ public class ProductoService {
         return toResponse(buscarEntidad(id));
     }
 
+    @Transactional(readOnly = true)
+    public List<ProductoResponse> listarPorAgricultor(Long agricultorId) {
+        return productoRepository.buscarPorAgricultor(agricultorId).stream()
+                .map(this::toResponse).toList();
+    }
+
     public Producto buscarEntidad(Long id) {
         return productoRepository.buscarPorId(id)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND,
