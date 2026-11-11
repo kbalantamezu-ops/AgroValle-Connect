@@ -67,6 +67,7 @@ class PrecioControllerTest extends BaseIntegracion {
                  "unidad": "kg", "fechaCosecha": "%s", "agricultorId": %d}
                 """.formatted(nombre, cantidad, precio, LocalDate.now().plusDays(4), agricultorId);
         mockMvc.perform(post("/api/v1/productos")
+                        .with(conToken(tokenAgricultor(agricultorId)))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(cuerpo))
                 .andExpect(status().isCreated());

@@ -17,6 +17,7 @@ class ProductoControllerTest extends BaseIntegracion {
     void publicarRetorna201ConDatosDelProducto() throws Exception {
         long agricultorId = registrarAgricultor("77000101", "SEVILLA");
         mockMvc.perform(post("/api/v1/productos")
+                        .with(conToken(tokenAgricultor(agricultorId)))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(cuerpoProducto("Guayaba Test", "FRUTAS", 100, "1500", agricultorId)))
                 .andExpect(status().isCreated())
@@ -29,6 +30,15 @@ class ProductoControllerTest extends BaseIntegracion {
     }
 
     @Test
+    void publicarSinAutenticacionRetorna401() throws Exception {
+        long agricultorId = registrarAgricultor("77000109", "SEVILLA");
+        mockMvc.perform(post("/api/v1/productos")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(cuerpoProducto("Sin Token", "FRUTAS", 10, "1000", agricultorId)))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
     void publicarConFechaPasadaRetorna400() throws Exception {
         long agricultorId = registrarAgricultor("77000102", "SEVILLA");
         String cuerpo = """
@@ -37,6 +47,7 @@ class ProductoControllerTest extends BaseIntegracion {
                  "agricultorId": %d}
                 """.formatted(agricultorId);
         mockMvc.perform(post("/api/v1/productos")
+                        .with(conToken(tokenAgricultor(agricultorId)))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(cuerpo))
                 .andExpect(status().isBadRequest())
@@ -44,12 +55,14 @@ class ProductoControllerTest extends BaseIntegracion {
     }
 
     @Test
-    void publicarConAgricultorInexistenteRetorna404() throws Exception {
+    void publicarParaOtroAgricultorRetorna403() throws Exception {
+        long agricultorId = registrarAgricultor("77000108", "SEVILLA");
+        long otro = registrarAgricultor("77000110", "BUGA");
         mockMvc.perform(post("/api/v1/productos")
+                        .with(conToken(tokenAgricultor(otro)))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(cuerpoProducto("Sin Agricultor", "FRUTAS", 10, "1000", 999999)))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value(containsString("999999")));
+                        .content(cuerpoProducto("Ajeno", "FRUTAS", 10, "1000", agricultorId)))
+                .andExpect(status().isForbidden());
     }
 
     @Test
@@ -110,6 +123,7 @@ class ProductoControllerTest extends BaseIntegracion {
     private long publicar(String nombre, String categoria, double cantidad, String precio, long agricultorId)
             throws Exception {
         String respuesta = mockMvc.perform(post("/api/v1/productos")
+                        .with(conToken(tokenAgricultor(agricultorId)))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(cuerpoProducto(nombre, categoria, cantidad, precio, agricultorId)))
                 .andExpect(status().isCreated())

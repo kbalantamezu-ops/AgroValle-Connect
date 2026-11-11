@@ -41,6 +41,9 @@ public class Pedido {
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal total;
 
+    @Column(name = "usuario_id")
+    private Long usuarioId;
+
     @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ItemPedido> items = new ArrayList<>();
 
@@ -102,6 +105,14 @@ public class Pedido {
 
     public void setTotal(BigDecimal total) {
         this.total = total;
+    }
+
+    public Long getUsuarioId() {
+        return usuarioId;
+    }
+
+    public void setUsuarioId(Long usuarioId) {
+        this.usuarioId = usuarioId;
     }
 
     public List<ItemPedido> getItems() {

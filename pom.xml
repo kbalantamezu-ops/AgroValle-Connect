@@ -32,10 +32,15 @@
 			<artifactId>spring-boot-starter-webmvc</artifactId>
 		</dependency>
 
-		<!-- BCryptPasswordEncoder y PasswordEncoder (sin activar Spring Security completo) -->
+		<!-- Spring Security: autenticacion JWT y BCryptPasswordEncoder -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+		<!-- Firma y validacion de tokens JWT (Nimbus) -->
 		<dependency>
 			<groupId>org.springframework.security</groupId>
-			<artifactId>spring-security-crypto</artifactId>
+			<artifactId>spring-security-oauth2-jose</artifactId>
 		</dependency>
 		<!-- @Getter, @Setter, @Builder y @NoArgsConstructor de entidades y DTO -->
 		<dependency>

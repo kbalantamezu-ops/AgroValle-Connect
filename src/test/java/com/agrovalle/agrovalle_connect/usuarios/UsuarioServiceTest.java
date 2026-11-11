@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.agrovalle.agrovalle_connect.excepciones.ReglaNegocioException;
+import com.agrovalle.agrovalle_connect.usuarios.Rol;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -50,8 +51,10 @@ class UsuarioServiceTest {
     ArgumentCaptor<Usuario> captor = ArgumentCaptor.forClass(Usuario.class);
     verify(repositorio).save(captor.capture());
     assertEquals("HASH", captor.getValue().getPasswordHash());
+    assertEquals("ana@correo.com", captor.getValue().getEmail());
     assertEquals(7L, respuesta.id());
     assertEquals("3001234567", respuesta.telefono());
+    assertEquals(Rol.COMPRADOR, respuesta.rol());
   }
 
   @Test

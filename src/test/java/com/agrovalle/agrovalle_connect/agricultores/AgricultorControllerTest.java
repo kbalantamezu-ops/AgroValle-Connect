@@ -85,7 +85,8 @@ class AgricultorControllerTest extends BaseIntegracion {
     @Test
     void panelRetornaResumenDelAgricultor() throws Exception {
         long id = registrar("Panel Test", "77000004", "PALMIRA");
-        mockMvc.perform(get("/api/v1/agricultores/" + id + "/panel"))
+        mockMvc.perform(get("/api/v1/agricultores/" + id + "/panel")
+                        .with(conToken(tokenAgricultor(id))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.agricultor.id").value(id))
                 .andExpect(jsonPath("$.agricultor.nombre").value("Panel Test"))
@@ -96,15 +97,25 @@ class AgricultorControllerTest extends BaseIntegracion {
     }
 
     @Test
-    void panelDeAgricultorInexistenteRetorna404() throws Exception {
-        mockMvc.perform(get("/api/v1/agricultores/999999/panel"))
-                .andExpect(status().isNotFound());
+    void panelRequiereAutenticacion() throws Exception {
+        mockMvc.perform(get("/api/v1/agricultores/1/panel"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void panelRechazaAgricultorAjeno() throws Exception {
+        long id = registrar("Panel Ajeno", "77000006", "CALI");
+        long otro = registrar("Otro Panel", "77000007", "BUGA");
+        mockMvc.perform(get("/api/v1/agricultores/" + id + "/panel")
+                        .with(conToken(tokenAgricultor(otro))))
+                .andExpect(status().isForbidden());
     }
 
     @Test
     void actualizarPerfilRetorna200() throws Exception {
         long id = registrar("Para Editar", "77000003", "SEVILLA");
         mockMvc.perform(put("/api/v1/agricultores/" + id)
+                        .with(conToken(tokenAgricultor(id)))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"nombre": "Nombre Editado", "cedula": "77000003", "municipio": "SEVILLA",

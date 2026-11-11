@@ -16,6 +16,7 @@ class ResenaControllerTest extends BaseIntegracion {
     void crearResenaRetorna201() throws Exception {
         long agricultorId = registrarAgricultor("77000301");
         mockMvc.perform(post("/api/v1/resenas")
+                        .with(conToken(tokenComprador()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(cuerpo(agricultorId, 5, "Excelente producto y entrega puntual", "Cliente Test")))
                 .andExpect(status().isCreated())
@@ -25,9 +26,19 @@ class ResenaControllerTest extends BaseIntegracion {
     }
 
     @Test
+    void crearResenaSinAutenticacionRetorna401() throws Exception {
+        long agricultorId = registrarAgricultor("77000304");
+        mockMvc.perform(post("/api/v1/resenas")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(cuerpo(agricultorId, 5, "Comentario", "Anonimo")))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
     void crearResenaConCalificacionInvalidaRetorna400() throws Exception {
         long agricultorId = registrarAgricultor("77000302");
         mockMvc.perform(post("/api/v1/resenas")
+                        .with(conToken(tokenComprador()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(cuerpo(agricultorId, 6, "Comentario", "Cliente Test")))
                 .andExpect(status().isBadRequest())
@@ -37,6 +48,7 @@ class ResenaControllerTest extends BaseIntegracion {
     @Test
     void crearResenaConAgricultorInexistenteRetorna404() throws Exception {
         mockMvc.perform(post("/api/v1/resenas")
+                        .with(conToken(tokenComprador()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(cuerpo(999999, 4, "Comentario", "Cliente Test")))
                 .andExpect(status().isNotFound())
@@ -47,6 +59,7 @@ class ResenaControllerTest extends BaseIntegracion {
     void listarResenasDeAgricultorRetorna200() throws Exception {
         long agricultorId = registrarAgricultor("77000303");
         mockMvc.perform(post("/api/v1/resenas")
+                        .with(conToken(tokenComprador()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(cuerpo(agricultorId, 4, "Buena calidad", "Cliente Lista")))
                 .andExpect(status().isCreated());

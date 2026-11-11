@@ -1,5 +1,7 @@
 package com.agrovalle.agrovalle_connect.pedidos;
 
+import com.agrovalle.agrovalle_connect.auth.AutorizacionService;
+import com.agrovalle.agrovalle_connect.auth.UsuarioPrincipal;
 import com.agrovalle.agrovalle_connect.comun.ApiException;
 import com.agrovalle.agrovalle_connect.pagos.MedioPago;
 import com.agrovalle.agrovalle_connect.pagos.MedioPagoRepository;
@@ -25,22 +27,28 @@ public class PedidoService {
 
     private final MedioPagoRepository medioPagoRepository;
 
+    private final AutorizacionService autorizacionService;
+
     public PedidoService(PedidoRepository pedidoRepository, ProductoRepository productoRepository,
-            NotificacionRepository notificacionRepository, MedioPagoRepository medioPagoRepository) {
+            NotificacionRepository notificacionRepository, MedioPagoRepository medioPagoRepository,
+            AutorizacionService autorizacionService) {
         this.pedidoRepository = pedidoRepository;
         this.productoRepository = productoRepository;
         this.notificacionRepository = notificacionRepository;
         this.medioPagoRepository = medioPagoRepository;
+        this.autorizacionService = autorizacionService;
     }
 
     @Transactional
-    public PedidoResponse crear(PedidoRequest request) {
+    public PedidoResponse crear(PedidoRequest request, UsuarioPrincipal principal) {
+        autorizacionService.exigirAutenticado(principal);
         MedioPago medioPago = medioPagoRepository.findById(request.medioPagoId())
                 .orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST,
                         "Medio de pago no encontrado con id " + request.medioPagoId()));
         Pedido pedido = new Pedido();
         pedido.setCompradorNombre(request.compradorNombre());
         pedido.setCompradorTelefono(request.compradorTelefono());
+        pedido.setUsuarioId(principal.id());
         pedido.setEstado(EstadoPedido.PENDIENTE);
         pedido.setFechaCreacion(LocalDateTime.now());
 
@@ -84,31 +92,45 @@ public class PedidoService {
     }
 
     @Transactional(readOnly = true)
-    public List<PedidoResponse> listar() {
-        return pedidoRepository.buscarTodosConItems().stream().map(this::toResponse).toList();
+    public List<PedidoResponse> listar(UsuarioPrincipal principal) {
+        autorizacionService.exigirAutenticado(principal);
+        List<Pedido> pedidos;
+        if (principal.esAdmin()) {
+            pedidos = pedidoRepository.buscarTodosConItems();
+        } else if (principal.esAgricultor()) {
+            pedidos = principal.agricultorId() == null ? List.of()
+                    : pedidoRepository.buscarPorAgricultorConItems(principal.agricultorId());
+        } else {
+            pedidos = pedidoRepository.buscarPorUsuarioConItems(principal.id());
+        }
+        return pedidos.stream().map(this::toResponse).toList();
     }
 
     @Transactional(readOnly = true)
-    public PedidoResponse obtener(Long id) {
-        return toResponse(buscarEntidad(id));
+    public PedidoResponse obtener(Long id, UsuarioPrincipal principal) {
+        Pedido pedido = buscarEntidad(id);
+        autorizacionService.exigirAccesoPedido(principal, pedido);
+        return toResponse(pedido);
     }
 
     @Transactional
-    public PedidoResponse cambiarEstado(Long id, EstadoRequest request) {
+    public PedidoResponse cambiarEstado(Long id, EstadoRequest request, UsuarioPrincipal principal) {
         Pedido pedido = buscarEntidad(id);
+        autorizacionService.exigirGestionPedido(principal, pedido);
         if (pedido.getEstado() == EstadoPedido.CANCELADO || pedido.getEstado() == EstadoPedido.ENTREGADO) {
             throw new ApiException(HttpStatus.CONFLICT,
-                    "El pedido ya está " + pedido.getEstado() + " y no puede cambiar de estado");
+                    "El pedido ya esta " + pedido.getEstado() + " y no puede cambiar de estado");
         }
         pedido.setEstado(request.estado());
         notificacionRepository.save(new Notificacion(pedido.getId(),
-                "El estado del pedido cambió a " + request.estado()));
+                "El estado del pedido cambio a " + request.estado()));
         return toResponse(pedido);
     }
 
     @Transactional(readOnly = true)
-    public List<NotificacionResponse> listarNotificaciones(Long id) {
-        buscarEntidad(id);
+    public List<NotificacionResponse> listarNotificaciones(Long id, UsuarioPrincipal principal) {
+        Pedido pedido = buscarEntidad(id);
+        autorizacionService.exigirAccesoPedido(principal, pedido);
         return notificacionRepository.findByPedidoIdOrderByFechaCreacionDesc(id).stream()
                 .map(n -> new NotificacionResponse(n.getId(), n.getPedidoId(), n.getMensaje(),
                         n.getFechaCreacion()))
