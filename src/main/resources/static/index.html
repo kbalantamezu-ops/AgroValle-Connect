@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgroValle Connect - Catálogo</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <header class="nav">
+        <a class="marca" href="/">
+            <span class="logo">AV</span>
+            <span>AgroValle Connect</span>
+        </a>
+        <nav class="enlaces">
+            <a href="/" class="activo">Catálogo</a>
+            <a href="/publicar.html">Publicar</a>
+            <a href="/pedidos.html">Mis pedidos</a>
+        </nav>
+        <button class="btn-carrito" id="btnAbrirCarrito" type="button">
+            Carrito
+            <span class="contador-carrito" id="contadorCarrito">0</span>
+        </button>
+    </header>
+
+    <section class="hero">
+        <h1>Del campo del Valle a tu mesa</h1>
+        <p>Cosechas frescas de Dagua, Palmira, Buga, Tuluá, Caicedonia y Jamundí,
+            directo del productor, a precio justo y con trazabilidad.</p>
+        <div class="buscador">
+            <input type="text" id="busqueda" placeholder="Busca por producto, categoría o municipio...">
+            <button type="button" id="btnBuscar">Buscar</button>
+        </div>
+    </section>
+
+    <main class="contenedor">
+        <div class="filtros">
+            <select id="filtroMunicipio" aria-label="Filtrar por municipio">
+                <option value="">Todos los municipios</option>
+            </select>
+            <select id="filtroCategoria" aria-label="Filtrar por categoría">
+                <option value="">Todas las categorías</option>
+            </select>
+            <label class="checkbox">
+                <input type="checkbox" id="filtroDisponible" checked>
+                Solo disponibles
+            </label>
+            <button class="btn btn-secundario" type="button" id="btnLimpiarFiltros">Limpiar filtros</button>
+        </div>
+
+        <h2 class="seccion-titulo">Precios promedio regionales</h2>
+        <div class="grid-precios" id="gridPrecios">
+            <div class="cargando">Cargando precios...</div>
+        </div>
+
+        <h2 class="seccion-titulo">Oferta disponible</h2>
+        <div class="grid-productos" id="gridProductos">
+            <div class="cargando">Cargando productos...</div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        AgroValle Connect - Conectando la oferta agrícola del Valle del Cauca con Cali.
+    </footer>
+
+    <!-- Modal detalle de producto -->
+    <div class="overlay" id="overlayDetalle">
+        <div class="modal">
+            <button class="cerrar" type="button" data-cerrar="overlayDetalle">&times;</button>
+            <div id="contenidoDetalle"></div>
+        </div>
+    </div>
+
+    <!-- Drawer carrito -->
+    <div class="overlay" id="overlayCarrito" data-cerrar="overlayCarrito"></div>
+    <aside class="drawer" id="drawerCarrito">
+        <div class="cabecera">
+            <strong>Tu carrito</strong>
+            <button type="button" id="btnCerrarCarrito">&times;</button>
+        </div>
+        <div class="items" id="itemsCarrito"></div>
+        <div class="pie">
+            <div class="total">
+                <span>Subtotal</span>
+                <span id="totalCarrito">$0</span>
+            </div>
+            <button class="btn btn-primario" type="button" id="btnFinalizarPedido" disabled>
+                Finalizar pedido
+            </button>
+        </div>
+    </aside>
+
+    <!-- Modal finalizar pedido -->
+    <div class="overlay" id="overlayCheckout">
+        <div class="modal">
+            <button class="cerrar" type="button" data-cerrar="overlayCheckout">&times;</button>
+            <div id="contenidoCheckout"></div>
+        </div>
+    </div>
+
+    <script type="module" src="/js/catalogo.js"></script>
+</body>
+</html>

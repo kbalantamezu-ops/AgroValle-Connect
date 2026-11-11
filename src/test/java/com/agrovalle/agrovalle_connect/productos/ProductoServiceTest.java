@@ -2,83 +2,88 @@ package com.agrovalle.agrovalle_connect.productos;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.agrovalle.agrovalle_connect.agricultores.Agricultor;
-import com.agrovalle.agrovalle_connect.agricultores.AgricultorRepository;
-import com.agrovalle.agrovalle_connect.excepciones.RecursoNoEncontradoException;
+import com.agrovalle.agrovalle_connect.agricultores.AgricultorService;
+import com.agrovalle.agrovalle_connect.catalogo.Categoria;
+import com.agrovalle.agrovalle_connect.catalogo.Municipio;
+import com.agrovalle.agrovalle_connect.comun.ApiException;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
 class ProductoServiceTest {
 
-  @Mock
-  private ProductoRepository productoRepositorio;
+    @Mock
+    private ProductoRepository productoRepository;
 
-  @Mock
-  private AgricultorRepository agricultorRepositorio;
+    @Mock
+    private AgricultorService agricultorService;
 
-  @Mock
-  private CategoriaRepository categoriaRepositorio;
+    @InjectMocks
+    private ProductoService servicio;
 
-  @Spy
-  private ProductoMapper mapper = new ProductoMapper();
+    private Agricultor crearAgricultor() {
+        Agricultor agricultor = new Agricultor("María Ospina", "1111111111", Municipio.DAGUA,
+                "3125550101", "maria@finca.co", "Finca El Porvenir");
+        ReflectionTestUtils.setField(agricultor, "id", 1L);
+        return agricultor;
+    }
 
-  @InjectMocks
-  private ProductoService servicio;
+    private ProductoRequest crearRequest() {
+        return new ProductoRequest("Tomate chonto", Categoria.VERDURAS, 40.0,
+                new BigDecimal("2500.00"), "kg", LocalDate.now().plusDays(3), 1L);
+    }
 
-  private ProductoRequest crearRequest() {
-    return new ProductoRequest(1L, 2L, "Tomate chonto", "Cosecha fresca", new BigDecimal("2500.00"), 40, "kg",
-        "https://fotos.com/tomate.jpg");
-  }
+    @Test
+    void publicarGuardaProductoYDevuelveRespuesta() {
+        when(agricultorService.buscarEntidad(1L)).thenReturn(crearAgricultor());
+        when(productoRepository.save(any(Producto.class))).thenAnswer(inv -> {
+            Producto producto = inv.getArgument(0);
+            ReflectionTestUtils.setField(producto, "id", 10L);
+            return producto;
+        });
 
-  @Test
-  void publicarGuardaProductoConFotoYDevuelveRespuesta() {
-    Agricultor agricultor = Agricultor.builder().id(1L).build();
-    Categoria categoria = Categoria.builder().id(2L).nombre("Verduras").build();
-    when(agricultorRepositorio.findById(1L)).thenReturn(Optional.of(agricultor));
-    when(categoriaRepositorio.findById(2L)).thenReturn(Optional.of(categoria));
-    when(productoRepositorio.save(any(Producto.class))).thenAnswer(inv -> {
-      Producto p = inv.getArgument(0);
-      p.setId(10L);
-      return p;
-    });
+        ProductoResponse respuesta = servicio.publicar(crearRequest());
 
-    ProductoResponse respuesta = servicio.publicar(crearRequest());
+        assertEquals(10L, respuesta.id());
+        assertEquals("Tomate chonto", respuesta.nombre());
+        assertEquals("VERDURAS", respuesta.categoria());
+        assertEquals("DAGUA", respuesta.municipio());
+        assertEquals(new BigDecimal("2500.00"), respuesta.precioUnitario());
+        assertEquals("Finca El Porvenir", respuesta.agricultor().finca());
+        assertTrue(respuesta.disponible());
+    }
 
-    assertEquals(10L, respuesta.id());
-    assertEquals(1L, respuesta.agricultorId());
-    assertEquals(2L, respuesta.categoriaId());
-    assertEquals("https://fotos.com/tomate.jpg", respuesta.fotoUrl());
-    assertEquals(new BigDecimal("2500.00"), respuesta.precio());
-  }
+    @Test
+    void publicarFallaSiElAgricultorNoExiste() {
+        when(agricultorService.buscarEntidad(1L))
+                .thenThrow(new ApiException(HttpStatus.NOT_FOUND, "no existe"));
 
-  @Test
-  void publicarFallaSiElAgricultorNoExiste() {
-    when(agricultorRepositorio.findById(1L)).thenReturn(Optional.empty());
+        assertThrows(ApiException.class, () -> servicio.publicar(crearRequest()));
 
-    assertThrows(RecursoNoEncontradoException.class, () -> servicio.publicar(crearRequest()));
+        verify(productoRepository, never()).save(any());
+    }
 
-    verify(productoRepositorio, never()).save(any());
-  }
+    @Test
+    void obtenerProductoInexistenteLanza404() {
+        when(productoRepository.buscarPorId(99L)).thenReturn(Optional.empty());
 
-  @Test
-  void publicarFallaSiLaCategoriaNoExiste() {
-    when(agricultorRepositorio.findById(1L)).thenReturn(Optional.of(Agricultor.builder().id(1L).build()));
-    when(categoriaRepositorio.findById(2L)).thenReturn(Optional.empty());
+        ApiException error = assertThrows(ApiException.class, () -> servicio.obtener(99L));
 
-    assertThrows(RecursoNoEncontradoException.class, () -> servicio.publicar(crearRequest()));
-
-    verify(productoRepositorio, never()).save(any());
-  }
+        assertEquals(HttpStatus.NOT_FOUND, error.getStatus());
+    }
 }

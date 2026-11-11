@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgroValle Connect - Publicar</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <header class="nav">
+        <a class="marca" href="/">
+            <span class="logo">AV</span>
+            <span>AgroValle Connect</span>
+        </a>
+        <nav class="enlaces">
+            <a href="/">Catálogo</a>
+            <a href="/publicar.html" class="activo">Publicar</a>
+            <a href="/pedidos.html">Mis pedidos</a>
+        </nav>
+    </header>
+
+    <main class="contenedor">
+        <h2 class="seccion-titulo">Publica tu cosecha</h2>
+        <div class="form-grid">
+            <section class="tarjeta-form">
+                <h2>Registro de agricultor</h2>
+                <p class="ayuda">Crea tu perfil de productor del Valle para ofrecer tus productos.</p>
+                <form id="formAgricultor">
+                    <div class="campo">
+                        <label for="aNombre">Nombre completo</label>
+                        <input type="text" id="aNombre" required maxlength="120">
+                    </div>
+                    <div class="campo">
+                        <label for="aCedula">Cédula</label>
+                        <input type="text" id="aCedula" required maxlength="20">
+                    </div>
+                    <div class="campo">
+                        <label for="aMunicipio">Municipio</label>
+                        <select id="aMunicipio" required></select>
+                    </div>
+                    <div class="campo">
+                        <label for="aTelefono">Teléfono de contacto</label>
+                        <input type="tel" id="aTelefono" maxlength="20" placeholder="312 000 0000">
+                    </div>
+                    <div class="campo">
+                        <label for="aEmail">Correo electrónico</label>
+                        <input type="email" id="aEmail" maxlength="120">
+                    </div>
+                    <div class="campo">
+                        <label for="aFinca">Nombre de la finca</label>
+                        <input type="text" id="aFinca" maxlength="120">
+                    </div>
+                    <button class="btn btn-primario" type="submit">Registrarme</button>
+                </form>
+            </section>
+
+            <section class="tarjeta-form">
+                <h2>Publicar producto</h2>
+                <p class="ayuda">Publica tu cosecha disponible para que los compradores la encuentren.</p>
+                <form id="formProducto">
+                    <div class="campo">
+                        <label for="pAgricultor">Agricultor</label>
+                        <select id="pAgricultor" required></select>
+                    </div>
+                    <div class="campo">
+                        <label for="pNombre">Nombre del producto</label>
+                        <input type="text" id="pNombre" required maxlength="120"
+                               placeholder="Ej: Café Pergamino">
+                    </div>
+                    <div class="campo">
+                        <label for="pCategoria">Categoría</label>
+                        <select id="pCategoria" required></select>
+                    </div>
+                    <div class="campo">
+                        <label for="pCantidad">Cantidad disponible</label>
+                        <input type="number" id="pCantidad" required min="0.1" step="0.1">
+                    </div>
+                    <div class="campo">
+                        <label for="pPrecio">Precio unitario (COP)</label>
+                        <input type="number" id="pPrecio" required min="1" step="1">
+                    </div>
+                    <div class="campo">
+                        <label for="pUnidad">Unidad</label>
+                        <input type="text" id="pUnidad" value="kg" maxlength="20">
+                    </div>
+                    <div class="campo">
+                        <label for="pFechaCosecha">Fecha estimada de cosecha</label>
+                        <input type="date" id="pFechaCosecha" required>
+                    </div>
+                    <button class="btn btn-acento" type="submit">Publicar producto</button>
+                </form>
+            </section>
+        </div>
+    </main>
+
+    <footer class="footer">
+        AgroValle Connect - Conectando la oferta agrícola del Valle del Cauca con Cali.
+    </footer>
+
+    <script type="module" src="/js/publicar.js"></script>
+</body>
+</html>

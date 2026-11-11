@@ -4,7 +4,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface AgricultorRepository extends JpaRepository<Agricultor, Long> {
 
-  boolean existsByCedula(String cedula);
-
-  boolean existsByEmail(String email);
+    boolean existsByCedula(String cedula);
 }
