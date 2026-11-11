@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.agrovalle</groupId>
 	<artifactId>agrovalle-connect</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<name>agrovalle-connect</name>
 	<description>AgroValle Connect: plataforma de comercio agricola directo del Valle del Cauca</description>
 	<properties>
