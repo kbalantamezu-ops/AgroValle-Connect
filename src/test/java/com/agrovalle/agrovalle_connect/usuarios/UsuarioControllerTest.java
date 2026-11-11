@@ -7,7 +7,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.agrovalle.agrovalle_connect.excepciones.GlobalExceptionHandler;
+import com.agrovalle.agrovalle_connect.comun.GlobalExceptionHandler;
 import com.agrovalle.agrovalle_connect.excepciones.ReglaNegocioException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
