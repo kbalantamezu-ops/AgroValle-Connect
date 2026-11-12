@@ -3,8 +3,8 @@
 ![Build Status](https://img.shields.io/github/actions/workflow/status/kbalantamezu-ops/AgroValle-Connect/ci.yml?branch=main&label=build)
 ![Java](https://img.shields.io/badge/Java-17-orange)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.1-brightgreen)
-![Tests](https://img.shields.io/badge/tests-82%20passing-success)
-![Coverage](https://img.shields.io/badge/coverage-79%25%20instructions-success)
+![Tests](https://img.shields.io/badge/tests-86%20passing-success)
+![Coverage](https://img.shields.io/badge/coverage-80%25%20instructions-success)
 
 > El badge de build refleja el pipeline de GitHub Actions definido en `.github/workflows/ci.yml`.
 > Estado verificado: `./mvnw clean verify` en verde, Checkstyle sin violaciones y cobertura superior al 60%.
@@ -151,20 +151,43 @@ Los errores siguen el formato `{ timestamp, status, error, message, path, fieldE
 Cada pedido queda asociado a las tablas del DER `MEDIOS_PAGO` (efectivo, transferencia, tarjeta) y `PAGOS`
 (monto `NUMERIC(12,2)`, estado y fecha de pago); el medio se selecciona al confirmar el pedido (HU-06).
 
+### Flete en el pedido
+
+`POST /pedidos` acepta `municipioDestino` (nombre del enum `Municipio`). Si se envía, el backend cotiza el
+flete con el patrón Strategy usando el peso total del pedido (suma de las cantidades de los ítems en kg) y
+lo suma al total:
+
+```json
+{
+  "compradorNombre": "Restaurante La Huerta",
+  "medioPagoId": 1,
+  "municipioDestino": "CALI",
+  "items": [{ "productoId": 1, "cantidad": 10 }]
+}
+```
+
+La respuesta incluye `flete`, `fleteZona` y `municipioDestino`; `total` y `pago.monto` ya incluyen el flete.
+Las zonas y tarifas de ejemplo son `CERCANA` (Cali, Yumbo, Palmira, Jamundí, Candelaria), `INTERMEDIA`
+(Tuluá, Buga, Cartago, Sevilla, Roldanillo) y `LEJANA` (cualquier otro municipio). El frontend permite elegir
+el municipio de entrega en el checkout y muestra la cotización antes de confirmar.
+
+Al pasar un pedido a `CANCELADO`, el stock de todos sus ítems se repone automáticamente y el producto vuelve
+a quedar disponible si tenía existencias en cero.
+
 ### Alcance actual y siguientes pasos
 
 Implementado y verificado:
 
 - Registro de agricultores y compradores, catálogo, filtros, precios promedio, carrito y pedidos.
 - Descuento automático de stock, estados, notificaciones, reseñas y panel del agricultor.
-- Cálculo de fletes con patrón Strategy y datos de ejemplo para desarrollo.
+- Cálculo de fletes con patrón Strategy, cotización en el checkout y flete incluido en el total del pedido.
 - Autenticación JWT con roles (`ADMIN`, `AGRICULTOR`, `COMPRADOR`), autorización por propiedad y frontend de login.
 
 Siguientes pasos recomendados:
 
 - Migraciones de base de datos con Flyway o Liquibase para reemplazar `ddl-auto=update`.
-- Integrar el costo de flete en el checkout y desplegar la aplicación en un entorno público.
-- Reponer stock al cancelar un pedido, edición/eliminación de productos y concurrencia de stock.
+- Desplegar la aplicación en un entorno público.
+- Edición/eliminación de productos, concurrencia de stock y paginación de listados.
 
 ## Estrategia de Ramas: GitFlow
 

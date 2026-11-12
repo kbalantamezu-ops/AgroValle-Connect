@@ -133,6 +133,12 @@ function renderPedido(pedido, notificaciones) {
 
     const puedeAvanzar = puedeGestionar && SIGUIENTE[pedido.estado] !== undefined;
     const puedeCancelar = puedeGestionar && pedido.estado !== 'CANCELADO' && pedido.estado !== 'ENTREGADO';
+    const flete = Number(pedido.flete ?? 0);
+    const subtotalProductos = Number(pedido.total ?? 0) - flete;
+    const destino = pedido.municipioDestino
+        ? `<span><strong>Entrega:</strong> ${escapeHtml(pedido.municipioDestino)}
+            ${pedido.fleteZona ? `(zona ${escapeHtml(pedido.fleteZona)})` : ''}</span>`
+        : '';
 
     $('#contenidoPedidos').innerHTML = `
         <article class="tarjeta-pedido">
@@ -146,6 +152,7 @@ function renderPedido(pedido, notificaciones) {
                 <span><strong>Comprador:</strong> ${escapeHtml(pedido.compradorNombre)}</span>
                 <span><strong>Teléfono:</strong> ${escapeHtml(pedido.compradorTelefono || '—')}</span>
                 <span><strong>Medio de pago:</strong> ${pagoHtml(pedido)}</span>
+                ${destino}
             </div>
 
             <div class="timeline">${pasos}${cancelado}</div>
@@ -158,10 +165,13 @@ function renderPedido(pedido, notificaciones) {
                 <tbody>${items}</tbody>
             </table>
 
-            <div class="fila" style="margin-top: 0.8rem;">
-                <span class="espaciador"></span>
-                <strong style="font-size: 1.15rem; color: var(--verde-800);">
-                    Total: ${moneda(pedido.total)}</strong>
+            <div class="resumen-checkout" style="max-width:380px; margin-left:auto;">
+                <div class="linea-resumen"><span>Subtotal productos</span>
+                    <span>${moneda(subtotalProductos)}</span></div>
+                <div class="linea-resumen"><span>Flete${pedido.fleteZona ? ` (${escapeHtml(pedido.fleteZona)})` : ''}</span>
+                    <span>${moneda(flete)}</span></div>
+                <div class="linea-resumen total"><span>Total</span>
+                    <span>${moneda(pedido.total)}</span></div>
             </div>
 
             ${puedeAvanzar || puedeCancelar ? `

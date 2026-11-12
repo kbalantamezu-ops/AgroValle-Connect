@@ -8,6 +8,8 @@ let categorias = [];
 let mediosPago = [];
 let productosActuales = [];
 let productoEnDetalle = null;
+let fleteCheckout = { costo: 0, zona: null, error: null };
+let cotizacionFleteId = 0;
 
 const $ = (selector) => document.querySelector(selector);
 
@@ -307,15 +309,20 @@ function abrirCheckout() {
             <td>${item.cantidad} ${escapeHtml(item.unidad)}</td>
             <td>${moneda(item.precioUnitario * item.cantidad)}</td>
         </tr>`).join('');
+    const opcionesMunicipio = municipios.map((m) => `
+        <option value="${m.nombre}" ${m.nombre === 'CALI' ? 'selected' : ''}>
+            ${escapeHtml(m.etiqueta)}</option>`).join('');
     $('#contenidoCheckout').innerHTML = `
         <h2>Finalizar pedido</h2>
         <table class="tabla">
             <thead><tr><th>Producto</th><th>Cantidad</th><th>Subtotal</th></tr></thead>
             <tbody>${resumen}</tbody>
         </table>
-        <p style="margin: 0.8rem 0; font-weight: 700;">Total:
-            ${moneda(carrito.total())}</p>
         <form id="formCheckout">
+            <div class="campo">
+                <label for="cMunicipioDestino">Municipio de entrega</label>
+                <select id="cMunicipioDestino" required>${opcionesMunicipio}</select>
+            </div>
             <div class="campo">
                 <label for="cNombre">Tu nombre</label>
                 <input type="text" id="cNombre" required maxlength="120" value="${escapeHtml(usuario.nombre)}">
@@ -330,11 +337,61 @@ function abrirCheckout() {
                     ${mediosPago.map((m) => `<option value="${m.id}">${escapeHtml(m.nombre)}</option>`).join('')}
                 </select>
             </div>
+            <div id="resumenCheckout" class="resumen-checkout"></div>
             <button class="btn btn-primario" type="submit">Confirmar pedido</button>
         </form>`;
     $('#formCheckout').addEventListener('submit', confirmarPedido);
+    $('#cMunicipioDestino').addEventListener('change', cotizarFleteCheckout);
+    fleteCheckout = { costo: 0, zona: null, error: null };
+    renderResumenCheckout();
+    cotizarFleteCheckout();
     cerrarCarrito();
     $('#overlayCheckout').classList.add('abierto');
+}
+
+function renderResumenCheckout() {
+    const contenedor = $('#resumenCheckout');
+    if (!contenedor) {
+        return;
+    }
+    const subtotal = carrito.total();
+    const flete = Number(fleteCheckout.costo ?? 0);
+    const etiquetaFlete = fleteCheckout.zona
+        ? `Flete a ${escapeHtml(etiquetaMunicipio($('#cMunicipioDestino').value))} (${fleteCheckout.zona})`
+        : 'Flete';
+    const aviso = fleteCheckout.error
+        ? `<p class="ayuda" style="color: var(--rojo);">${escapeHtml(fleteCheckout.error)}</p>`
+        : '';
+    contenedor.innerHTML = `
+        <div class="linea-resumen"><span>Subtotal productos</span><span>${moneda(subtotal)}</span></div>
+        <div class="linea-resumen"><span>${etiquetaFlete}</span><span>${moneda(flete)}</span></div>
+        <div class="linea-resumen total"><span>Total a pagar</span><span>${moneda(subtotal + flete)}</span></div>
+        ${aviso}`;
+}
+
+async function cotizarFleteCheckout() {
+    const select = $('#cMunicipioDestino');
+    if (!select) {
+        return;
+    }
+    const solicitud = ++cotizacionFleteId;
+    const peso = carrito.items().reduce((suma, item) => suma + item.cantidad, 0);
+    try {
+        const cotizacion = await api.post('/fletes/calcular', {
+            municipio: select.value,
+            pesoKg: Math.max(peso, 0.1),
+        });
+        if (solicitud !== cotizacionFleteId) {
+            return;
+        }
+        fleteCheckout = { costo: Number(cotizacion.costo), zona: cotizacion.zona, error: null };
+    } catch (error) {
+        if (solicitud !== cotizacionFleteId) {
+            return;
+        }
+        fleteCheckout = { costo: 0, zona: null, error: `No se pudo cotizar el flete: ${error.message}` };
+    }
+    renderResumenCheckout();
 }
 
 async function confirmarPedido(evento) {
@@ -345,6 +402,7 @@ async function confirmarPedido(evento) {
         compradorNombre: $('#cNombre').value.trim(),
         compradorTelefono: $('#cTelefono').value.trim() || null,
         medioPagoId: Number($('#cMedioPago').value),
+        municipioDestino: $('#cMunicipioDestino').value,
         items: carrito.items().map((item) => ({
             productoId: item.productoId,
             cantidad: item.cantidad,
@@ -360,8 +418,10 @@ async function confirmarPedido(evento) {
                 <h2>¡Pedido confirmado!</h2>
                 <p>Tu pedido quedó registrado con el número</p>
                 <div class="pedido-id">#${pedido.id}</div>
-                <p style="color: var(--gris); margin: 0.8rem 0;">El stock fue descontado automáticamente.
-                    Recibirás notificaciones de cada cambio de estado.</p>
+                <p style="color: var(--gris); margin: 0.8rem 0;">
+                    Productos + flete a ${escapeHtml(etiquetaMunicipio(pedido.municipioDestino))}:
+                    <strong>${moneda(pedido.total)}</strong>.
+                    El stock fue descontado automáticamente y recibirás notificaciones de cada cambio de estado.</p>
                 <a class="btn btn-primario" href="/pedidos.html?id=${pedido.id}">
                     Ver estado del pedido</a>
             </div>`;
