@@ -31,12 +31,36 @@ public class ProductoService {
         producto.setCategoria(request.categoria());
         producto.setCantidadDisponible(request.cantidadDisponible());
         producto.setPrecioUnitario(request.precioUnitario());
-        producto.setUnidad(request.unidad() == null || request.unidad().isBlank() ? "kg" : request.unidad());
+        producto.setUnidad(unidadDe(request.unidad()));
         producto.setFechaCosecha(request.fechaCosecha());
         producto.setFechaPublicacion(LocalDateTime.now());
         producto.setDisponible(true);
         producto.setAgricultor(agricultor);
         return toResponse(productoRepository.save(producto));
+    }
+
+    @Transactional
+    public ProductoResponse actualizar(Long id, ProductoUpdateRequest request) {
+        Producto producto = buscarEntidad(id);
+        producto.setNombre(request.nombre());
+        producto.setCategoria(request.categoria());
+        producto.setCantidadDisponible(request.cantidadDisponible());
+        producto.setPrecioUnitario(request.precioUnitario());
+        producto.setUnidad(unidadDe(request.unidad()));
+        producto.setFechaCosecha(request.fechaCosecha());
+        producto.setDisponible(request.cantidadDisponible() > 0);
+        return toResponse(productoRepository.save(producto));
+    }
+
+    @Transactional
+    public void eliminar(Long id) {
+        Producto producto = buscarEntidad(id);
+        if (productoRepository.contarPedidosAsociados(id) > 0) {
+            throw new ApiException(HttpStatus.CONFLICT,
+                    "No se puede eliminar el producto '" + producto.getNombre()
+                            + "' porque tiene pedidos asociados");
+        }
+        productoRepository.delete(producto);
     }
 
     @Transactional(readOnly = true)
@@ -61,6 +85,10 @@ public class ProductoService {
         return productoRepository.buscarPorId(id)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND,
                         "Producto no encontrado con id " + id));
+    }
+
+    private String unidadDe(String unidad) {
+        return unidad == null || unidad.isBlank() ? "kg" : unidad;
     }
 
     private ProductoResponse toResponse(Producto producto) {

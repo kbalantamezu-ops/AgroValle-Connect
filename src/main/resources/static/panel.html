@@ -37,6 +37,40 @@
         </div>
     </main>
 
+    <div class="overlay" id="overlayEditar">
+        <div class="modal">
+            <button class="cerrar" type="button" id="cerrarEditar" aria-label="Cerrar">&times;</button>
+            <h2>Editar publicación</h2>
+            <form id="formEditar">
+                <div class="campo">
+                    <label for="eNombre">Producto</label>
+                    <input type="text" id="eNombre" required maxlength="120">
+                </div>
+                <div class="campo">
+                    <label for="eCategoria">Categoría</label>
+                    <select id="eCategoria" required></select>
+                </div>
+                <div class="campo">
+                    <label for="eCantidad">Cantidad disponible</label>
+                    <input type="number" id="eCantidad" min="0" step="0.01" required>
+                </div>
+                <div class="campo">
+                    <label for="eUnidad">Unidad</label>
+                    <input type="text" id="eUnidad" maxlength="20" value="kg">
+                </div>
+                <div class="campo">
+                    <label for="ePrecio">Precio unitario</label>
+                    <input type="number" id="ePrecio" min="0.01" step="0.01" required>
+                </div>
+                <div class="campo">
+                    <label for="eFechaCosecha">Fecha de cosecha</label>
+                    <input type="date" id="eFechaCosecha" required>
+                </div>
+                <button class="btn btn-primario" type="submit">Guardar cambios</button>
+            </form>
+        </div>
+    </div>
+
     <footer class="footer">
         AgroValle Connect - Conectando la oferta agrícola del Valle del Cauca con Cali.
     </footer>

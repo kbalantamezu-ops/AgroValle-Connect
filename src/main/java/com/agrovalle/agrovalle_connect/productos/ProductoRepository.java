@@ -34,4 +34,7 @@ public interface ProductoRepository extends JpaRepository<Producto, Long> {
     List<Producto> buscarPorAgricultor(@Param("agricultorId") Long agricultorId);
 
     List<Producto> findByCategoria(Categoria categoria);
+
+    @Query("select count(i) from ItemPedido i where i.producto.id = :productoId")
+    long contarPedidosAsociados(@Param("productoId") Long productoId);
 }

@@ -4,6 +4,20 @@ Todos los cambios relevantes del proyecto se documentan en este archivo.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/) y
 [Versionamiento Semántico](https://semver.org/lang/es/).
 
+## [1.3.0] - 2026-11-11
+
+### Agregado
+
+- `PUT /api/v1/productos/{id}` para editar publicaciones conservando el agricultor propietario.
+- `DELETE /api/v1/productos/{id}` con respuesta `204` cuando el producto no tiene pedidos asociados.
+- Autorización por propietario o administrador para editar y eliminar productos.
+- Acciones de edición y eliminación en el panel del agricultor, con formulario modal y confirmación previa.
+- Manejo de errores `403` y `409` en el panel mediante notificaciones.
+
+### Seguridad
+
+- El borrado de un producto con ítems de pedido asociados responde `409 Conflict` para preservar la trazabilidad.
+
 ## [1.2.0] - 2026-11-11
 
 ### Agregado

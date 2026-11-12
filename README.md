@@ -3,8 +3,8 @@
 ![Build Status](https://img.shields.io/github/actions/workflow/status/kbalantamezu-ops/AgroValle-Connect/ci.yml?branch=main&label=build)
 ![Java](https://img.shields.io/badge/Java-17-orange)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.1-brightgreen)
-![Tests](https://img.shields.io/badge/tests-86%20passing-success)
-![Coverage](https://img.shields.io/badge/coverage-80%25%20instructions-success)
+![Tests](https://img.shields.io/badge/tests-102%20passing-success)
+![Coverage](https://img.shields.io/badge/coverage-81%25%20instructions-success)
 
 > El badge de build refleja el pipeline de GitHub Actions definido en `.github/workflows/ci.yml`.
 > Estado verificado: `./mvnw clean verify` en verde, Checkstyle sin violaciones y cobertura superior al 60%.
@@ -115,6 +115,7 @@ La consola de H2 está disponible en `/h2-console` (JDBC URL `jdbc:h2:mem:agrova
 | `GET` / `PUT` | `/agricultores`, `/agricultores/{id}` | HU-12 Editar Perfil |
 | `GET` | `/agricultores/{id}/panel` | HU-15 Panel del Agricultor |
 | `POST` | `/productos` | HU-02 Publicación de Productos |
+| `PUT` / `DELETE` | `/productos/{id}` | HU-02 / HU-15 Edición y Eliminación de Productos |
 | `GET` | `/productos?q=&municipio=&categoria=&disponible=` | HU-04 / HU-13 Búsqueda y Filtros |
 | `GET` | `/precios/promedio?categoria=CAFE` | HU-03 Precios Regionales |
 | `POST` | `/pedidos` | HU-09 / HU-11 Pedido y Descuento de Stock |
@@ -140,7 +141,7 @@ y las peticiones protegidas deben enviar la cabecera `Authorization: Bearer <tok
 | --- | --- |
 | Público (sin token) | Consultar catálogo, productos, precios, medios de pago, reseñas y fletes; registrarse e iniciar sesión. |
 | `COMPRADOR` | Crear pedidos, ver sus pedidos y notificaciones, y crear reseñas. |
-| `AGRICULTOR` | Todo lo del comprador, publicar productos, editar su perfil, ver su panel y cambiar el estado de los pedidos de sus productos. |
+| `AGRICULTOR` | Todo lo del comprador, publicar, editar y eliminar sus productos, editar su perfil, ver su panel y cambiar el estado de los pedidos de sus productos. |
 | `ADMIN` | Acceso completo a productos, pedidos, agricultores y panel. |
 
 Las cuentas demo del perfil de desarrollo son `comprador@agrovalle.co` / `Demo1234*`,
@@ -174,6 +175,21 @@ el municipio de entrega en el checkout y muestra la cotización antes de confirm
 Al pasar un pedido a `CANCELADO`, el stock de todos sus ítems se repone automáticamente y el producto vuelve
 a quedar disponible si tenía existencias en cero.
 
+### Edición y eliminación de productos
+
+`PUT /productos/{id}` reemplaza los datos editables de una publicación con un cuerpo que contiene
+`nombre`, `categoria`, `cantidadDisponible`, `precioUnitario`, `unidad` y `fechaCosecha`. El producto
+conserva siempre a su propietario original y solo el agricultor dueño o un administrador pueden ejecutar
+la operación. La cantidad puede ser `0` para dejar la publicación como agotada.
+
+`DELETE /productos/{id}` elimina una publicación y responde `204 No Content`. Para proteger la trazabilidad
+de las ventas, solo se permite el borrado físico cuando el producto no tiene ítems de pedido asociados. Si
+los tiene, la API responde `409 Conflict` con un mensaje explicativo y el producto permanece intacto.
+
+El panel del agricultor incluye las acciones **Editar** y **Eliminar** en la tabla de publicaciones, con un
+formulario modal para la edición y confirmación previa para el borrado. Los errores `403` y `409` se muestran
+como notificaciones al usuario.
+
 ### Alcance actual y siguientes pasos
 
 Implementado y verificado:
@@ -182,12 +198,13 @@ Implementado y verificado:
 - Descuento automático de stock, estados, notificaciones, reseñas y panel del agricultor.
 - Cálculo de fletes con patrón Strategy, cotización en el checkout y flete incluido en el total del pedido.
 - Autenticación JWT con roles (`ADMIN`, `AGRICULTOR`, `COMPRADOR`), autorización por propiedad y frontend de login.
+- Edición y eliminación de productos con autorización por propietario y bloqueo de borrado cuando hay pedidos asociados.
 
 Siguientes pasos recomendados:
 
 - Migraciones de base de datos con Flyway o Liquibase para reemplazar `ddl-auto=update`.
 - Desplegar la aplicación en un entorno público.
-- Edición/eliminación de productos, concurrencia de stock y paginación de listados.
+- Concurrencia de stock y paginación de listados.
 
 ## Estrategia de Ramas: GitFlow
 
