@@ -1,8 +1,19 @@
 import { api } from './api.js';
 import { carrito } from './carrito.js';
+import { sesion } from './sesion.js';
 import { escapeHtml, fechaHora, moneda, mostrarToast } from './ui.js';
 
 const $ = (selector) => document.querySelector(selector);
+const usuario = sesion.usuario();
+const puedeGestionar = usuario?.rol === 'AGRICULTOR' || usuario?.rol === 'ADMIN';
+
+function sinSesion(contenedor) {
+    contenedor.innerHTML = `
+        <div class="vacio">
+            Inicia sesión para consultar pedidos.
+            <a href="/login.html?volver=/pedidos.html">Entrar o registrarme</a>
+        </div>`;
+}
 
 const PASOS = ['PENDIENTE', 'EN_PREPARACION', 'ENVIADO', 'ENTREGADO'];
 const ETIQUETAS = ['Pendiente', 'En preparación', 'Enviado', 'Entregado'];
@@ -29,6 +40,10 @@ async function consultarPedido(id) {
         mostrarToast('Ingresa un número de pedido válido', 'error');
         return;
     }
+    if (!usuario) {
+        sinSesion($('#contenidoPedidos'));
+        return;
+    }
     try {
         const [pedido, notificaciones] = await Promise.all([
             api.get(`/pedidos/${id}`),
@@ -36,6 +51,10 @@ async function consultarPedido(id) {
         ]);
         renderPedido(pedido, notificaciones);
     } catch (error) {
+        if (error.status === 401) {
+            sinSesion($('#contenidoPedidos'));
+            return;
+        }
         mostrarToast(error.message, 'error');
         $('#contenidoPedidos').innerHTML =
             `<div class="vacio">${escapeHtml(error.message)}</div>`;
@@ -43,11 +62,15 @@ async function consultarPedido(id) {
 }
 
 async function listarPedidos() {
+    if (!usuario) {
+        sinSesion($('#contenidoPedidos'));
+        return;
+    }
     try {
         const pedidos = await api.get('/pedidos');
         if (pedidos.length === 0) {
             $('#contenidoPedidos').innerHTML =
-                '<div class="vacio">Todavía no hay pedidos registrados.</div>';
+                '<div class="vacio">Todavía no tienes pedidos registrados.</div>';
             return;
         }
         const filas = pedidos.map((pedido) => `
@@ -67,6 +90,10 @@ async function listarPedidos() {
                 <tbody>${filas}</tbody>
             </table>`;
     } catch (error) {
+        if (error.status === 401) {
+            sinSesion($('#contenidoPedidos'));
+            return;
+        }
         mostrarToast(error.message, 'error');
     }
 }
@@ -104,8 +131,8 @@ function renderPedido(pedido, notificaciones) {
             <span>Cancelado</span>
         </div>` : '';
 
-    const puedeAvanzar = SIGUIENTE[pedido.estado] !== undefined;
-    const puedeCancelar = pedido.estado !== 'CANCELADO' && pedido.estado !== 'ENTREGADO';
+    const puedeAvanzar = puedeGestionar && SIGUIENTE[pedido.estado] !== undefined;
+    const puedeCancelar = puedeGestionar && pedido.estado !== 'CANCELADO' && pedido.estado !== 'ENTREGADO';
 
     $('#contenidoPedidos').innerHTML = `
         <article class="tarjeta-pedido">
@@ -137,12 +164,13 @@ function renderPedido(pedido, notificaciones) {
                     Total: ${moneda(pedido.total)}</strong>
             </div>
 
+            ${puedeAvanzar || puedeCancelar ? `
             <div class="acciones-pedido">
                 ${puedeAvanzar ? `<button class="btn btn-primario" type="button" data-avanzar="${pedido.id}">
                     Marcar como ${ETIQUETAS[PASOS.indexOf(SIGUIENTE[pedido.estado])].toLowerCase()}</button>` : ''}
                 ${puedeCancelar ? `<button class="btn btn-peligro" type="button" data-cancelar="${pedido.id}">
                     Cancelar pedido</button>` : ''}
-            </div>
+            </div>` : ''}
 
             <h3 style="color: var(--verde-800); margin-top: 1.2rem;">Notificaciones</h3>
             <div class="notificaciones">
@@ -158,6 +186,10 @@ async function cambiarEstado(id, estado) {
         renderPedido(pedido, notificaciones);
         mostrarToast(`Pedido #${id} actualizado a ${estado}`);
     } catch (error) {
+        if (error.status === 401) {
+            sinSesion($('#contenidoPedidos'));
+            return;
+        }
         mostrarToast(error.message, 'error');
     }
 }
@@ -194,8 +226,14 @@ function iniciar() {
     bindEventos();
     const parametros = new URLSearchParams(window.location.search);
     const id = parametros.get('id');
-    if (id) {
+    if (!usuario) {
+        $('#btnListarPedidos').disabled = true;
+        $('#btnBuscarPedido').disabled = true;
+        sinSesion($('#contenidoPedidos'));
+    } else if (id) {
         consultarPedido(Number(id));
+    } else {
+        listarPedidos();
     }
     if (carrito.contar() > 0) {
         mostrarToast('Tienes productos en el carrito. Finaliza tu pedido desde el catálogo.');

@@ -1,10 +1,14 @@
+import { sesion } from './sesion.js';
+
 const API_BASE = '/api/v1';
 
 async function apiFetch(path, options = {}) {
-    const config = {
-        headers: { 'Content-Type': 'application/json' },
-        ...options,
-    };
+    const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
+    const token = sesion.token();
+    if (token) {
+        headers.Authorization = `Bearer ${token}`;
+    }
+    const config = { ...options, headers };
     const response = await fetch(`${API_BASE}${path}`, config);
     const body = response.status === 204 ? null : await response.json().catch(() => null);
     if (!response.ok) {
@@ -20,7 +24,9 @@ async function apiFetch(path, options = {}) {
                 mensaje = `${mensaje}. ${campos}`;
             }
         }
-        throw new Error(mensaje);
+        const error = new Error(mensaje);
+        error.status = response.status;
+        throw error;
     }
     return body;
 }

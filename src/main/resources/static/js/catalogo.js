@@ -1,5 +1,6 @@
 import { api } from './api.js';
 import { carrito } from './carrito.js';
+import { sesion } from './sesion.js';
 import { escapeHtml, etiquetaDe, fecha, fechaHora, moneda, mostrarToast } from './ui.js';
 
 let municipios = [];
@@ -158,6 +159,31 @@ function detalleHtml(producto, resenas) {
             ${r.comentario ? `<p>${escapeHtml(r.comentario)}</p>` : ''}
         </div>`).join('');
 
+    const usuario = sesion.usuario();
+    const formularioResena = usuario ? `
+            <form class="form-resena" id="formResena">
+                <div class="campo">
+                    <label for="rAutor">Tu nombre</label>
+                    <input type="text" id="rAutor" required maxlength="120" value="${escapeHtml(usuario.nombre)}">
+                </div>
+                <div class="campo">
+                    <label for="rCalificacion">Calificación (1 a 5)</label>
+                    <select id="rCalificacion" required>
+                        <option value="5">5 - Excelente</option>
+                        <option value="4">4 - Muy bueno</option>
+                        <option value="3">3 - Bueno</option>
+                        <option value="2">2 - Regular</option>
+                        <option value="1">1 - Malo</option>
+                    </select>
+                </div>
+                <div class="campo">
+                    <label for="rComentario">Comentario (opcional)</label>
+                    <textarea id="rComentario" rows="2" maxlength="500"></textarea>
+                </div>
+                <button class="btn btn-acento" type="submit">Enviar reseña</button>
+            </form>`
+        : '<p class="ayuda"><a href="/login.html?volver=/">Inicia sesión</a> para dejar una reseña a este productor.</p>';
+
     return `
         <h2>${escapeHtml(producto.nombre)}</h2>
         <div class="detalle-grid">
@@ -190,27 +216,7 @@ function detalleHtml(producto, resenas) {
         <div class="resenas">
             <h3 style="color: var(--verde-800);">Reseñas del productor</h3>
             ${listaResenas || '<p style="color: var(--gris);">Aún no hay reseñas para este productor.</p>'}
-            <form class="form-resena" id="formResena">
-                <div class="campo">
-                    <label for="rAutor">Tu nombre</label>
-                    <input type="text" id="rAutor" required maxlength="120">
-                </div>
-                <div class="campo">
-                    <label for="rCalificacion">Calificación (1 a 5)</label>
-                    <select id="rCalificacion" required>
-                        <option value="5">5 - Excelente</option>
-                        <option value="4">4 - Muy bueno</option>
-                        <option value="3">3 - Bueno</option>
-                        <option value="2">2 - Regular</option>
-                        <option value="1">1 - Malo</option>
-                    </select>
-                </div>
-                <div class="campo">
-                    <label for="rComentario">Comentario (opcional)</label>
-                    <textarea id="rComentario" rows="2" maxlength="500"></textarea>
-                </div>
-                <button class="btn btn-acento" type="submit">Enviar reseña</button>
-            </form>
+            ${formularioResena}
         </div>`;
 }
 
@@ -219,11 +225,16 @@ async function enviarResena(evento) {
     if (!productoEnDetalle) {
         return;
     }
+    const usuario = sesion.usuario();
+    if (!usuario) {
+        mostrarToast('Inicia sesión para dejar una reseña', 'error');
+        return;
+    }
     const cuerpo = {
         agricultorId: productoEnDetalle.agricultor.id,
         calificacion: Number($('#rCalificacion').value),
         comentario: $('#rComentario').value.trim() || null,
-        autorNombre: $('#rAutor').value.trim(),
+        autorNombre: $('#rAutor').value.trim() || usuario.nombre,
     };
     try {
         await api.post('/resenas', cuerpo);
@@ -277,6 +288,19 @@ function abrirCheckout() {
     if (items.length === 0) {
         return;
     }
+    const usuario = sesion.usuario();
+    if (!usuario) {
+        cerrarCarrito();
+        $('#contenidoCheckout').innerHTML = `
+            <h2>Finalizar pedido</h2>
+            <p class="ayuda" style="margin:0.8rem 0;">
+                Para confirmar tu pedido necesitas iniciar sesión con una cuenta.
+            </p>
+            <a class="btn btn-primario" href="/login.html?volver=/">Iniciar sesión o registrarme</a>
+            <p class="ayuda" style="margin-top:1rem;">Tu carrito se conserva mientras te registras.</p>`;
+        $('#overlayCheckout').classList.add('abierto');
+        return;
+    }
     const resumen = items.map((item) => `
         <tr>
             <td>${escapeHtml(item.nombre)}</td>
@@ -294,11 +318,11 @@ function abrirCheckout() {
         <form id="formCheckout">
             <div class="campo">
                 <label for="cNombre">Tu nombre</label>
-                <input type="text" id="cNombre" required maxlength="120">
+                <input type="text" id="cNombre" required maxlength="120" value="${escapeHtml(usuario.nombre)}">
             </div>
             <div class="campo">
                 <label for="cTelefono">Teléfono de contacto</label>
-                <input type="tel" id="cTelefono" maxlength="20">
+                <input type="tel" id="cTelefono" maxlength="20" value="${escapeHtml(usuario.telefono ?? '')}">
             </div>
             <div class="campo">
                 <label for="cMedioPago">Medio de pago</label>
@@ -344,9 +368,12 @@ async function confirmarPedido(evento) {
         await cargarProductos();
     } catch (error) {
         mostrarToast(error.message, 'error');
+        const mensaje = error.status === 401
+            ? 'Tu sesión expiró. <a href="/login.html?volver=/">Inicia sesión de nuevo</a> para confirmar el pedido.'
+            : escapeHtml(error.message);
         $('#contenidoCheckout').innerHTML = `
             <h2>Finalizar pedido</h2>
-            <p style="color: var(--rojo); margin-bottom: 1rem;">${escapeHtml(error.message)}</p>
+            <p style="color: var(--rojo); margin-bottom: 1rem;">${mensaje}</p>
             <button class="btn btn-secundario" type="button" id="btnVolverCheckout">Volver</button>`;
         $('#btnVolverCheckout').addEventListener('click', () => {
             $('#overlayCheckout').classList.remove('abierto');
