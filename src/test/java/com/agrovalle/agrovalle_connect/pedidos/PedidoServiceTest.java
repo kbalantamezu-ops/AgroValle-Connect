@@ -10,12 +10,15 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.agrovalle.agrovalle_connect.agricultores.Agricultor;
+import com.agrovalle.agrovalle_connect.auth.AutorizacionService;
+import com.agrovalle.agrovalle_connect.auth.UsuarioPrincipal;
 import com.agrovalle.agrovalle_connect.catalogo.Municipio;
 import com.agrovalle.agrovalle_connect.comun.ApiException;
 import com.agrovalle.agrovalle_connect.pagos.MedioPago;
 import com.agrovalle.agrovalle_connect.pagos.MedioPagoRepository;
 import com.agrovalle.agrovalle_connect.productos.Producto;
 import com.agrovalle.agrovalle_connect.productos.ProductoRepository;
+import com.agrovalle.agrovalle_connect.usuarios.Rol;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
@@ -33,7 +36,11 @@ class PedidoServiceTest {
 
     private MedioPagoRepository medioPagoRepository;
 
+    private AutorizacionService autorizacionService;
+
     private PedidoService pedidoService;
+
+    private UsuarioPrincipal comprador;
 
     @BeforeEach
     void configurar() {
@@ -41,9 +48,11 @@ class PedidoServiceTest {
         productoRepository = mock(ProductoRepository.class);
         notificacionRepository = mock(NotificacionRepository.class);
         medioPagoRepository = mock(MedioPagoRepository.class);
+        autorizacionService = mock(AutorizacionService.class);
+        comprador = new UsuarioPrincipal(10L, "comprador@test.co", Rol.COMPRADOR, null);
         when(medioPagoRepository.findById(1L)).thenReturn(Optional.of(new MedioPago("EFECTIVO")));
         pedidoService = new PedidoService(pedidoRepository, productoRepository, notificacionRepository,
-                medioPagoRepository);
+                medioPagoRepository, autorizacionService);
     }
 
     @Test
@@ -53,7 +62,7 @@ class PedidoServiceTest {
         PedidoRequest request = new PedidoRequest("Comprador", null, 1L,
                 List.of(new ItemPedidoRequest(1L, 15.0)));
 
-        ApiException ex = assertThrows(ApiException.class, () -> pedidoService.crear(request));
+        ApiException ex = assertThrows(ApiException.class, () -> pedidoService.crear(request, comprador));
         assertEquals(HttpStatus.CONFLICT, ex.getStatus());
         verify(pedidoRepository, never()).save(any());
         assertEquals(10, producto.getCantidadDisponible());
@@ -67,7 +76,7 @@ class PedidoServiceTest {
         PedidoRequest request = new PedidoRequest("Comprador", null, 1L,
                 List.of(new ItemPedidoRequest(1L, 2.0)));
 
-        ApiException ex = assertThrows(ApiException.class, () -> pedidoService.crear(request));
+        ApiException ex = assertThrows(ApiException.class, () -> pedidoService.crear(request, comprador));
         assertEquals(HttpStatus.CONFLICT, ex.getStatus());
     }
 
@@ -77,7 +86,7 @@ class PedidoServiceTest {
         PedidoRequest request = new PedidoRequest("Comprador", null, 1L,
                 List.of(new ItemPedidoRequest(999L, 2.0)));
 
-        ApiException ex = assertThrows(ApiException.class, () -> pedidoService.crear(request));
+        ApiException ex = assertThrows(ApiException.class, () -> pedidoService.crear(request, comprador));
         assertEquals(HttpStatus.NOT_FOUND, ex.getStatus());
     }
 
@@ -87,7 +96,7 @@ class PedidoServiceTest {
         PedidoRequest request = new PedidoRequest("Comprador", null, 999L,
                 List.of(new ItemPedidoRequest(1L, 2.0)));
 
-        ApiException ex = assertThrows(ApiException.class, () -> pedidoService.crear(request));
+        ApiException ex = assertThrows(ApiException.class, () -> pedidoService.crear(request, comprador));
         assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
         verify(pedidoRepository, never()).save(any());
     }
@@ -100,7 +109,7 @@ class PedidoServiceTest {
         PedidoRequest request = new PedidoRequest("Comprador", null, 1L,
                 List.of(new ItemPedidoRequest(1L, 5.0)));
 
-        PedidoResponse respuesta = pedidoService.crear(request);
+        PedidoResponse respuesta = pedidoService.crear(request, comprador);
 
         assertEquals(0, producto.getCantidadDisponible());
         assertFalse(producto.isDisponible());
@@ -119,7 +128,7 @@ class PedidoServiceTest {
         when(pedidoRepository.buscarPorIdConItems(1L)).thenReturn(Optional.of(pedido));
 
         ApiException ex = assertThrows(ApiException.class,
-                () -> pedidoService.cambiarEstado(1L, new EstadoRequest(EstadoPedido.ENVIADO)));
+                () -> pedidoService.cambiarEstado(1L, new EstadoRequest(EstadoPedido.ENVIADO), comprador));
         assertEquals(HttpStatus.CONFLICT, ex.getStatus());
         verify(notificacionRepository, never()).save(any());
     }
@@ -132,7 +141,7 @@ class PedidoServiceTest {
         pedido.setTotal(BigDecimal.ZERO);
         when(pedidoRepository.buscarPorIdConItems(1L)).thenReturn(Optional.of(pedido));
 
-        PedidoResponse respuesta = pedidoService.cambiarEstado(1L, new EstadoRequest(EstadoPedido.ENVIADO));
+        PedidoResponse respuesta = pedidoService.cambiarEstado(1L, new EstadoRequest(EstadoPedido.ENVIADO), comprador);
 
         assertEquals("ENVIADO", respuesta.estado());
         verify(notificacionRepository).save(any(Notificacion.class));

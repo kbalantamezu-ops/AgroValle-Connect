@@ -2,6 +2,8 @@ package com.agrovalle.agrovalle_connect.usuarios;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -12,7 +14,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-/** Usuario comprador de la plataforma (HU-12). */
+/** Cuenta de acceso a la plataforma. Puede ser comprador, agricultor o administrador. */
 @Entity
 @Table(name = "usuarios")
 @Getter
@@ -37,4 +39,12 @@ public class Usuario {
 
   @Column(length = 20)
   private String telefono;
+
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false, length = 20)
+  @Builder.Default
+  private Rol rol = Rol.COMPRADOR;
+
+  @Column(name = "agricultor_id", unique = true)
+  private Long agricultorId;
 }

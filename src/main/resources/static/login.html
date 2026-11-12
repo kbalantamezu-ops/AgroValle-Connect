@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgroValle Connect - Iniciar sesion</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <header class="nav">
+        <a class="marca" href="/">
+            <span class="logo">AV</span>
+            <span>AgroValle Connect</span>
+        </a>
+        <nav class="enlaces">
+            <a href="/">Catalogo</a>
+            <a href="/publicar.html">Publicar</a>
+            <a href="/pedidos.html">Mis pedidos</a>
+            <a href="/panel.html">Panel</a>
+            <a href="/login.html" class="activo" data-nav-sesion>Cuenta</a>
+        </nav>
+    </header>
+
+    <main class="contenedor">
+        <h2 class="seccion-titulo">Accede a tu cuenta</h2>
+        <div class="form-grid">
+            <section class="tarjeta-form">
+                <h2>Iniciar sesion</h2>
+                <p class="ayuda">Usa tu correo y contrasena para comprar, publicar o gestionar tu panel.</p>
+                <form id="formLogin">
+                    <div class="campo">
+                        <label for="lEmail">Correo</label>
+                        <input type="email" id="lEmail" required maxlength="150">
+                    </div>
+                    <div class="campo">
+                        <label for="lPassword">Contrasena</label>
+                        <input type="password" id="lPassword" required minlength="8">
+                    </div>
+                    <button class="btn btn-primario" type="submit">Entrar</button>
+                </form>
+                <p class="ayuda" style="margin-top:1rem;">Cuentas demo: <code>comprador@agrovalle.co</code> / <code>Demo1234*</code>,
+                    <code>agricultor@agrovalle.co</code> / <code>Demo1234*</code>.</p>
+            </section>
+
+            <section class="tarjeta-form">
+                <h2>Registro de comprador</h2>
+                <p class="ayuda">Crea una cuenta para realizar pedidos y dejar resenas.</p>
+                <form id="formRegistroComprador">
+                    <div class="campo">
+                        <label for="rcNombre">Nombre</label>
+                        <input type="text" id="rcNombre" required maxlength="120">
+                    </div>
+                    <div class="campo">
+                        <label for="rcEmail">Correo</label>
+                        <input type="email" id="rcEmail" required maxlength="150">
+                    </div>
+                    <div class="campo">
+                        <label for="rcPassword">Contrasena</label>
+                        <input type="password" id="rcPassword" required minlength="8" maxlength="72">
+                    </div>
+                    <div class="campo">
+                        <label for="rcTelefono">Telefono</label>
+                        <input type="tel" id="rcTelefono" maxlength="20">
+                    </div>
+                    <button class="btn btn-secundario" type="submit">Crear cuenta de comprador</button>
+                </form>
+            </section>
+        </div>
+
+        <section class="tarjeta-form" style="margin-top:1.5rem; max-width:720px;">
+            <h2>Registro de agricultor con cuenta</h2>
+            <p class="ayuda">Crea tu perfil y tu cuenta para publicar productos y ver tu panel.</p>
+            <form id="formRegistroAgricultor">
+                <div class="campo"><label for="raNombre">Nombre</label><input id="raNombre" required maxlength="120"></div>
+                <div class="campo"><label for="raCedula">Cedula</label><input id="raCedula" required maxlength="20"></div>
+                <div class="campo"><label for="raMunicipio">Municipio</label><select id="raMunicipio" required></select></div>
+                <div class="campo"><label for="raTelefono">Telefono</label><input id="raTelefono" maxlength="20"></div>
+                <div class="campo"><label for="raEmail">Correo</label><input type="email" id="raEmail" required maxlength="120"></div>
+                <div class="campo"><label for="raFinca">Finca</label><input id="raFinca" maxlength="120"></div>
+                <div class="campo"><label for="raPassword">Contrasena</label><input type="password" id="raPassword" required minlength="8" maxlength="72"></div>
+                <button class="btn btn-acento" type="submit">Crear cuenta de agricultor</button>
+            </form>
+        </section>
+
+        <section id="sesionActual" class="tarjeta-form" style="margin-top:1.5rem; display:none;"></section>
+    </main>
+
+    <footer class="footer">AgroValle Connect - Conectando la oferta agricola del Valle del Cauca con Cali.</footer>
+    <script type="module" src="/js/login.js"></script>
+</body>
+</html>

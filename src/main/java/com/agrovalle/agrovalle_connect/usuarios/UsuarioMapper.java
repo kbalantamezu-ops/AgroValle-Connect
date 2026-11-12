@@ -8,13 +8,15 @@ public class UsuarioMapper {
   public Usuario toEntity(UsuarioRequest request, String passwordHash) {
     return Usuario.builder()
         .nombre(request.nombre())
-        .email(request.email())
+        .email(request.email().trim().toLowerCase())
         .passwordHash(passwordHash)
         .telefono(request.telefono())
+        .rol(Rol.COMPRADOR)
         .build();
   }
 
   public UsuarioResponse toResponse(Usuario usuario) {
-    return new UsuarioResponse(usuario.getId(), usuario.getNombre(), usuario.getEmail(), usuario.getTelefono());
+    return new UsuarioResponse(usuario.getId(), usuario.getNombre(), usuario.getEmail(),
+        usuario.getTelefono(), usuario.getRol(), usuario.getAgricultorId());
   }
 }

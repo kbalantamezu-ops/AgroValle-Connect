@@ -15,12 +15,16 @@ import com.agrovalle.agrovalle_connect.pedidos.Pedido;
 import com.agrovalle.agrovalle_connect.pedidos.PedidoRepository;
 import com.agrovalle.agrovalle_connect.productos.Producto;
 import com.agrovalle.agrovalle_connect.productos.ProductoRepository;
+import com.agrovalle.agrovalle_connect.usuarios.Rol;
+import com.agrovalle.agrovalle_connect.usuarios.Usuario;
+import com.agrovalle.agrovalle_connect.usuarios.UsuarioRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Profile;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,14 +43,21 @@ public class DataInitializer implements CommandLineRunner {
 
     private final MedioPagoRepository medioPagoRepository;
 
+    private final UsuarioRepository usuarioRepository;
+
+    private final PasswordEncoder passwordEncoder;
+
     public DataInitializer(AgricultorRepository agricultorRepository, ProductoRepository productoRepository,
             PedidoRepository pedidoRepository, NotificacionRepository notificacionRepository,
-            MedioPagoRepository medioPagoRepository) {
+            MedioPagoRepository medioPagoRepository, UsuarioRepository usuarioRepository,
+            PasswordEncoder passwordEncoder) {
         this.agricultorRepository = agricultorRepository;
         this.productoRepository = productoRepository;
         this.pedidoRepository = pedidoRepository;
         this.notificacionRepository = notificacionRepository;
         this.medioPagoRepository = medioPagoRepository;
+        this.usuarioRepository = usuarioRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -58,6 +69,7 @@ public class DataInitializer implements CommandLineRunner {
             medioPagoRepository.save(new MedioPago("TARJETA"));
         }
         if (agricultorRepository.count() > 0) {
+            sembrarUsuariosDemo();
             return;
         }
         Agricultor maria = agricultorRepository.save(new Agricultor("María Fernanda Ospina", "1111111111",
@@ -72,6 +84,8 @@ public class DataInitializer implements CommandLineRunner {
                 Municipio.CAICEDONIA, "316 555 0505", "sandra.torres@fincalaaurora.co", "Finca La Aurora"));
         Agricultor pedro = agricultorRepository.save(new Agricultor("Pedro Nel García", "6666666666",
                 Municipio.JAMUNDI, "317 555 0606", "pedro.garcia@fincasanpedro.co", "Finca San Pedro"));
+
+        Long compradorDemoId = sembrarUsuariosDemo();
 
         Producto pina = productoRepository.save(producto("Piña Gold", Categoria.FRUTAS, 500, "2500",
                 "kg", maria, 5));
@@ -94,6 +108,7 @@ public class DataInitializer implements CommandLineRunner {
         pedido.setEstado(EstadoPedido.EN_PREPARACION);
         pedido.setFechaCreacion(LocalDateTime.now().minusDays(1));
         pedido.setTotal(new BigDecimal("31400.00"));
+        pedido.setUsuarioId(compradorDemoId);
         pedido.agregarItem(item(pedido, pina, 8, new BigDecimal("2500.00")));
         pedido.agregarItem(item(pedido, tomate, 5, new BigDecimal("3200.00")));
         Pago pago = new Pago();
@@ -108,6 +123,41 @@ public class DataInitializer implements CommandLineRunner {
         notificacionRepository.save(new Notificacion(guardado.getId(), "Pedido creado con estado PENDIENTE"));
         notificacionRepository.save(new Notificacion(guardado.getId(),
                 "El estado del pedido cambió a EN_PREPARACION"));
+    }
+
+    private Long sembrarUsuariosDemo() {
+        Long agricultorId = agricultorRepository.findAll().stream()
+                .map(Agricultor::getId)
+                .findFirst()
+                .orElse(null);
+        Usuario comprador = usuarioRepository.findByEmail("comprador@agrovalle.co")
+                .orElseGet(() -> usuarioRepository.save(Usuario.builder()
+                        .nombre("Comprador Demo")
+                        .email("comprador@agrovalle.co")
+                        .passwordHash(passwordEncoder.encode("Demo1234*"))
+                        .telefono("300 000 0001")
+                        .rol(Rol.COMPRADOR)
+                        .build()));
+        if (agricultorId != null && !usuarioRepository.existsByEmail("agricultor@agrovalle.co")
+                && !usuarioRepository.existsByAgricultorId(agricultorId)) {
+            usuarioRepository.save(Usuario.builder()
+                    .nombre("Maria Fernanda Ospina")
+                    .email("agricultor@agrovalle.co")
+                    .passwordHash(passwordEncoder.encode("Demo1234*"))
+                    .telefono("312 555 0101")
+                    .rol(Rol.AGRICULTOR)
+                    .agricultorId(agricultorId)
+                    .build());
+        }
+        if (!usuarioRepository.existsByEmail("admin@agrovalle.co")) {
+            usuarioRepository.save(Usuario.builder()
+                    .nombre("Administrador AgroValle")
+                    .email("admin@agrovalle.co")
+                    .passwordHash(passwordEncoder.encode("Admin1234*"))
+                    .rol(Rol.ADMIN)
+                    .build());
+        }
+        return comprador.getId();
     }
 
     private Producto producto(String nombre, Categoria categoria, double cantidad, String precio,

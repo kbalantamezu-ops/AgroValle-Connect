@@ -1,4 +1,5 @@
 import { api } from './api.js';
+import { sesion } from './sesion.js';
 import { mostrarToast } from './ui.js';
 
 const $ = (selector) => document.querySelector(selector);
@@ -20,11 +21,20 @@ async function cargarOpciones() {
 
 async function cargarAgricultores() {
     const select = $('#pAgricultor');
+    const usuario = sesion.usuario();
     select.innerHTML = '<option value="">Selecciona un agricultor...</option>';
     const agricultores = await api.get('/agricultores');
     agricultores.forEach((a) => {
         select.add(new Option(`${a.nombre} (${a.municipio})`, a.id));
     });
+    if (usuario?.rol === 'AGRICULTOR' && usuario.agricultorId) {
+        select.value = String(usuario.agricultorId);
+        select.disabled = true;
+    } else if (usuario?.rol === 'ADMIN') {
+        select.disabled = false;
+    } else {
+        select.disabled = false;
+    }
 }
 
 async function registrarAgricultor(evento) {
@@ -41,7 +51,7 @@ async function registrarAgricultor(evento) {
     };
     try {
         const agricultor = await api.post('/agricultores', cuerpo);
-        mostrarToast(`Agricultor ${agricultor.nombre} registrado con éxito`);
+        mostrarToast(`Agricultor ${agricultor.nombre} registrado. Crea tu cuenta en /login.html para publicar.`);
         evento.target.reset();
         await cargarAgricultores();
         $('#pAgricultor').value = agricultor.id;
@@ -54,8 +64,21 @@ async function registrarAgricultor(evento) {
 
 async function publicarProducto(evento) {
     evento.preventDefault();
+    const usuario = sesion.usuario();
+    if (!usuario) {
+        mostrarToast('Inicia sesión como agricultor para publicar productos.', 'error');
+        window.setTimeout(() => {
+            window.location.href = '/login.html?volver=/publicar.html';
+        }, 900);
+        return;
+    }
+    if (usuario.rol !== 'AGRICULTOR' && usuario.rol !== 'ADMIN') {
+        mostrarToast('Solo las cuentas de agricultor pueden publicar productos.', 'error');
+        return;
+    }
     const boton = $('#formProducto button[type="submit"]');
     boton.disabled = true;
+    const agricultorId = usuario.rol === 'AGRICULTOR' ? usuario.agricultorId : Number($('#pAgricultor').value);
     const cuerpo = {
         nombre: $('#pNombre').value.trim(),
         categoria: $('#pCategoria').value,
@@ -63,14 +86,17 @@ async function publicarProducto(evento) {
         precioUnitario: Number($('#pPrecio').value),
         unidad: $('#pUnidad').value.trim() || 'kg',
         fechaCosecha: $('#pFechaCosecha').value,
-        agricultorId: Number($('#pAgricultor').value),
+        agricultorId,
     };
     try {
         const producto = await api.post('/productos', cuerpo);
-        mostrarToast(`Producto "${producto.nombre}" publicado con éxito`);
+        mostrarToast(`Producto "${producto.nombre}" publicado con exito`);
         evento.target.reset();
         $('#pUnidad').value = 'kg';
         $('#pFechaCosecha').value = hoy();
+        if (usuario.rol === 'AGRICULTOR') {
+            $('#pAgricultor').value = String(usuario.agricultorId);
+        }
     } catch (error) {
         mostrarToast(error.message, 'error');
     } finally {

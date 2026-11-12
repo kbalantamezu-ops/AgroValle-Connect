@@ -4,6 +4,35 @@ Todos los cambios relevantes del proyecto se documentan en este archivo.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/) y
 [Versionamiento Semántico](https://semver.org/lang/es/).
 
+## [1.1.0] - 2026-11-11
+
+### Agregado
+
+- Autenticación stateless con JWT HS256 y roles `ADMIN`, `AGRICULTOR` y `COMPRADOR`.
+- Endpoints `/api/v1/auth/login`, `/auth/me`, `/auth/registro/comprador` y `/auth/registro/agricultor`.
+- Autorización por propiedad: cada comprador ve sus pedidos y cada agricultor gestiona sus productos y pedidos.
+- Página `/login.html` con inicio de sesión, registro de compradores y registro de agricultores con cuenta vinculada.
+- El frontend adjunta `Authorization: Bearer` y adapta catálogo, checkout, pedidos y panel según el rol.
+- Cuentas demo de comprador, agricultor y administrador en el perfil de desarrollo.
+
+### Cambiado
+
+- El listado de pedidos se filtra por comprador, agricultor o administrador.
+- Publicar productos, crear pedidos, reseñar y consultar pedidos requieren autenticación.
+- `Usuario` ahora incluye `rol` y `agricultorId`, y las respuestas nunca exponen la contraseña.
+- La configuración JWT se toma de `app.jwt.secret` / `APP_JWT_SECRET` (obligatoria en el perfil `postgres`).
+
+### Seguridad
+
+- Filtro JWT, respuestas JSON de 401/403 y `PasswordEncoder` BCrypt gestionado por Spring Security.
+- Consola H2 deshabilitada en el perfil `postgres`.
+
+### Pendiente para próximas versiones
+
+- Migraciones de base de datos con Flyway o Liquibase.
+- Integración del costo de flete en el checkout y despliegue público.
+- Reposición de stock al cancelar pedidos y edición/eliminación de productos.
+
 ## [1.0.0] - 2026-11-11
 
 ### Agregado

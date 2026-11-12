@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.agrovalle.agrovalle_connect.comun.GlobalExceptionHandler;
 import com.agrovalle.agrovalle_connect.excepciones.ReglaNegocioException;
+import com.agrovalle.agrovalle_connect.usuarios.Rol;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,11 +44,13 @@ class UsuarioControllerTest {
   @Test
   void postRegistraUsuarioYDevuelve201() throws Exception {
     when(servicio.registrar(any(UsuarioRequest.class)))
-        .thenReturn(new UsuarioResponse(7L, "Ana Gómez", "ana@correo.com", "3001234567"));
+        .thenReturn(new UsuarioResponse(7L, "Ana Gómez", "ana@correo.com", "3001234567",
+            Rol.COMPRADOR, null));
 
     mockMvc.perform(post("/api/v1/usuarios").contentType(MediaType.APPLICATION_JSON).content(JSON_VALIDO))
         .andExpect(status().isCreated())
-        .andExpect(jsonPath("$.id").value(7));
+        .andExpect(jsonPath("$.id").value(7))
+        .andExpect(jsonPath("$.rol").value("COMPRADOR"));
   }
 
   @Test

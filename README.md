@@ -3,7 +3,7 @@
 ![Build Status](https://img.shields.io/github/actions/workflow/status/kbalantamezu-ops/AgroValle-Connect/ci.yml?branch=main&label=build)
 ![Java](https://img.shields.io/badge/Java-17-orange)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.1-brightgreen)
-![Tests](https://img.shields.io/badge/tests-73%20passing-success)
+![Tests](https://img.shields.io/badge/tests-82%20passing-success)
 ![Coverage](https://img.shields.io/badge/coverage-79%25%20instructions-success)
 
 > El badge de build refleja el pipeline de GitHub Actions definido en `.github/workflows/ci.yml`.
@@ -40,6 +40,7 @@ El Valle del Cauca es una despensa agrícola con municipios de alta vocación ag
 - **Base de datos**: PostgreSQL en el perfil `postgres`; H2 en memoria para desarrollo y pruebas
 - **Frontend**: HTML5, CSS3 y JavaScript vanilla servidos desde `src/main/resources/static`
 - **Arquitectura**: MVC por capas (`controller` → `service` → `repository` → `entity`), con DTOs y patrones Strategy/Factory en fletes
+- **Seguridad**: Spring Security con JWT HS256 (Nimbus), BCrypt y autorización por roles/propiedad
 - **Calidad**: Checkstyle (Google Java Style), JUnit 5 + MockMvc + JaCoCo (cobertura mínima 60%)
 - **Automatización**: GitHub Actions y Husky (pre-commit hooks)
 
@@ -48,6 +49,7 @@ El Valle del Cauca es una despensa agrícola con municipios de alta vocación ag
 ```text
 src/main/java/com/agrovalle/agrovalle_connect/
 ├── agricultores/   # HU-01, HU-12, HU-15
+├── auth/           # Login, registro, JWT y autorización por roles
 ├── catalogo/       # Municipios y categorías
 ├── comun/          # Manejo de errores, CORS y respuestas API
 ├── config/         # Seguridad y datos de ejemplo
@@ -90,6 +92,7 @@ La aplicación queda disponible en `http://localhost:8080`:
 | `/publicar.html` | Registro de agricultores y publicación de productos. |
 | `/pedidos.html` | Consulta del estado de un pedido, línea de tiempo, avance de estado y notificaciones. |
 | `/panel.html` | Panel del agricultor con publicaciones, pedidos recibidos y ventas acumuladas (HU-15). |
+| `/login.html` | Inicio de sesión, registro de compradores y registro de agricultores con cuenta. |
 
 La consola de H2 está disponible en `/h2-console` (JDBC URL `jdbc:h2:mem:agrovalle`, usuario `sa`).
 
@@ -102,6 +105,7 @@ La consola de H2 está disponible en `/h2-console` (JDBC URL `jdbc:h2:mem:agrova
 | `SPRING_DATASOURCE_USERNAME` | `postgres` | Usuario de la base de datos |
 | `SPRING_DATASOURCE_PASSWORD` | `postgres` | Contraseña de la base de datos |
 | `APP_CORS_ALLOWED_ORIGINS` | `http://localhost:8080` | Orígenes permitidos, separados por coma |
+| `APP_JWT_SECRET` | Secreto de desarrollo | Clave HS256 de al menos 32 caracteres. **Obligatoria en el perfil `postgres`.** |
 
 ## API REST (`/api/v1`)
 
@@ -122,6 +126,26 @@ La consola de H2 está disponible en `/h2-console` (JDBC URL `jdbc:h2:mem:agrova
 | `GET` | `/catalogo/municipios`, `/catalogo/categorias` | Catálogo del Valle |
 | `POST` | `/fletes/calcular` | HU-07 Cálculo de Transporte |
 | `POST` | `/usuarios` | HU-12 Registro de Compradores |
+| `POST` | `/auth/login` | Inicio de sesión (token JWT) |
+| `GET` | `/auth/me` | Cuenta autenticada |
+| `POST` | `/auth/registro/comprador` | Registro de comprador con cuenta |
+| `POST` | `/auth/registro/agricultor` | Registro de agricultor con cuenta vinculada |
+
+### Autenticación y roles
+
+La API usa **JWT stateless** (HS256). El login devuelve `{ token, tokenType: "Bearer", expiresInSeconds, usuario }`
+y las peticiones protegidas deben enviar la cabecera `Authorization: Bearer <token>`.
+
+| Rol | Puede |
+| --- | --- |
+| Público (sin token) | Consultar catálogo, productos, precios, medios de pago, reseñas y fletes; registrarse e iniciar sesión. |
+| `COMPRADOR` | Crear pedidos, ver sus pedidos y notificaciones, y crear reseñas. |
+| `AGRICULTOR` | Todo lo del comprador, publicar productos, editar su perfil, ver su panel y cambiar el estado de los pedidos de sus productos. |
+| `ADMIN` | Acceso completo a productos, pedidos, agricultores y panel. |
+
+Las cuentas demo del perfil de desarrollo son `comprador@agrovalle.co` / `Demo1234*`,
+`agricultor@agrovalle.co` / `Demo1234*` y `admin@agrovalle.co` / `Admin1234*`.
+Las lecturas de catálogo siguen siendo públicas; publicar, comprar, reseñar y consultar pedidos exige token.
 
 Los errores siguen el formato `{ timestamp, status, error, message, path, fieldErrors }`.
 Cada pedido queda asociado a las tablas del DER `MEDIOS_PAGO` (efectivo, transferencia, tarjeta) y `PAGOS`
@@ -134,13 +158,13 @@ Implementado y verificado:
 - Registro de agricultores y compradores, catálogo, filtros, precios promedio, carrito y pedidos.
 - Descuento automático de stock, estados, notificaciones, reseñas y panel del agricultor.
 - Cálculo de fletes con patrón Strategy y datos de ejemplo para desarrollo.
+- Autenticación JWT con roles (`ADMIN`, `AGRICULTOR`, `COMPRADOR`), autorización por propiedad y frontend de login.
 
 Siguientes pasos recomendados:
 
-- Autenticación y autorización con JWT para asociar pedidos y publicaciones a un usuario real.
 - Migraciones de base de datos con Flyway o Liquibase para reemplazar `ddl-auto=update`.
-- Restringir el listado global de pedidos y el cambio de estado según el rol autenticado.
 - Integrar el costo de flete en el checkout y desplegar la aplicación en un entorno público.
+- Reponer stock al cancelar un pedido, edición/eliminación de productos y concurrencia de stock.
 
 ## Estrategia de Ramas: GitFlow
 

@@ -1,9 +1,12 @@
 package com.agrovalle.agrovalle_connect.agricultores;
 
+import com.agrovalle.agrovalle_connect.auth.AutorizacionService;
+import com.agrovalle.agrovalle_connect.auth.UsuarioPrincipal;
 import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,10 +23,14 @@ public class AgricultorController {
 
     private final PanelAgricultorService panelAgricultorService;
 
+    private final AutorizacionService autorizacionService;
+
     public AgricultorController(AgricultorService agricultorService,
-            PanelAgricultorService panelAgricultorService) {
+            PanelAgricultorService panelAgricultorService,
+            AutorizacionService autorizacionService) {
         this.agricultorService = agricultorService;
         this.panelAgricultorService = panelAgricultorService;
+        this.autorizacionService = autorizacionService;
     }
 
     @PostMapping
@@ -42,12 +49,16 @@ public class AgricultorController {
     }
 
     @PutMapping("/{id}")
-    public AgricultorResponse actualizar(@PathVariable Long id, @Valid @RequestBody AgricultorRequest request) {
+    public AgricultorResponse actualizar(@AuthenticationPrincipal UsuarioPrincipal principal,
+            @PathVariable Long id, @Valid @RequestBody AgricultorRequest request) {
+        autorizacionService.exigirPropietarioOAdmin(principal, id);
         return agricultorService.actualizar(id, request);
     }
 
     @GetMapping("/{id}/panel")
-    public PanelAgricultorResponse panel(@PathVariable Long id) {
+    public PanelAgricultorResponse panel(@AuthenticationPrincipal UsuarioPrincipal principal,
+            @PathVariable Long id) {
+        autorizacionService.exigirPropietarioOAdmin(principal, id);
         return panelAgricultorService.obtener(id);
     }
 }

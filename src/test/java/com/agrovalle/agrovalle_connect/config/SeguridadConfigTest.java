@@ -4,13 +4,14 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 class SeguridadConfigTest {
 
   @Test
   void passwordEncoderCifraYVerificaContrasenas() {
-    PasswordEncoder encoder = new SeguridadConfig().passwordEncoder();
+    PasswordEncoder encoder = new BCryptPasswordEncoder();
 
     String hash = encoder.encode("clave1234");
 

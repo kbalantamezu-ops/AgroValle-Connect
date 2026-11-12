@@ -25,6 +25,7 @@ class PedidoControllerTest extends BaseIntegracion {
                  "medioPagoId": %d, "items": [{"productoId": %d, "cantidad": 10}]}
                 """.formatted(medioPagoId, productoId);
         mockMvc.perform(post("/api/v1/pedidos")
+                        .with(conToken(tokenComprador()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(cuerpo))
                 .andExpect(status().isCreated())
@@ -44,6 +45,17 @@ class PedidoControllerTest extends BaseIntegracion {
     }
 
     @Test
+    void crearRequiereAutenticacion() throws Exception {
+        mockMvc.perform(post("/api/v1/pedidos")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"compradorNombre": "Sin Token", "medioPagoId": 1,
+                                 "items": [{"productoId": 1, "cantidad": 1}]}
+                                """))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
     void crearConStockInsuficienteRetorna409SinDescontar() throws Exception {
         long agricultorId = registrarAgricultor("77000202");
         long productoId = publicarProducto("Papa Test", "TUBERCULOS", 5, "3000", agricultorId);
@@ -52,6 +64,7 @@ class PedidoControllerTest extends BaseIntegracion {
                  "items": [{"productoId": %d, "cantidad": 50}]}
                 """.formatted(medioPagoId("EFECTIVO"), productoId);
         mockMvc.perform(post("/api/v1/pedidos")
+                        .with(conToken(tokenComprador()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(cuerpo))
                 .andExpect(status().isConflict())
@@ -69,6 +82,7 @@ class PedidoControllerTest extends BaseIntegracion {
                  "items": [{"productoId": 999999, "cantidad": 2}]}
                 """.formatted(medioPagoId("EFECTIVO"));
         mockMvc.perform(post("/api/v1/pedidos")
+                        .with(conToken(tokenComprador()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(cuerpo))
                 .andExpect(status().isNotFound())
@@ -84,6 +98,7 @@ class PedidoControllerTest extends BaseIntegracion {
                  "items": [{"productoId": %d, "cantidad": 2}]}
                 """.formatted(productoId);
         mockMvc.perform(post("/api/v1/pedidos")
+                        .with(conToken(tokenComprador()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(cuerpo))
                 .andExpect(status().isBadRequest())
@@ -93,9 +108,10 @@ class PedidoControllerTest extends BaseIntegracion {
     @Test
     void crearSinItemsRetorna400() throws Exception {
         mockMvc.perform(post("/api/v1/pedidos")
+                        .with(conToken(tokenComprador()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                {"compradorNombre": "Comprador Test", "items": []}
+                                {"compradorNombre": "Comprador Test", "medioPagoId": 1, "items": []}
                                 """))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.fieldErrors.items").exists());
@@ -103,24 +119,28 @@ class PedidoControllerTest extends BaseIntegracion {
 
     @Test
     void cambiarEstadoGeneraNotificacionYEstadoTerminalBloqueaCambios() throws Exception {
-        long pedidoId = crearPedido("77000203", "Papa Avanza", 20);
+        PedidoContexto contexto = crearPedido("77000203", "Papa Avanza", 20);
 
-        mockMvc.perform(patch("/api/v1/pedidos/" + pedidoId + "/estado")
+        mockMvc.perform(patch("/api/v1/pedidos/" + contexto.pedidoId() + "/estado")
+                        .with(conToken(tokenAgricultor(contexto.agricultorId())))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"estado\": \"ENVIADO\"}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.estado").value("ENVIADO"));
 
-        mockMvc.perform(get("/api/v1/pedidos/" + pedidoId + "/notificaciones"))
+        mockMvc.perform(get("/api/v1/pedidos/" + contexto.pedidoId() + "/notificaciones")
+                        .with(conToken(contexto.compradorToken())))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[*].mensaje", hasItem(containsString("cambió a ENVIADO"))));
+                .andExpect(jsonPath("$[*].mensaje", hasItem(containsString("cambio a ENVIADO"))));
 
-        mockMvc.perform(patch("/api/v1/pedidos/" + pedidoId + "/estado")
+        mockMvc.perform(patch("/api/v1/pedidos/" + contexto.pedidoId() + "/estado")
+                        .with(conToken(tokenAgricultor(contexto.agricultorId())))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"estado\": \"ENTREGADO\"}"))
                 .andExpect(status().isOk());
 
-        mockMvc.perform(patch("/api/v1/pedidos/" + pedidoId + "/estado")
+        mockMvc.perform(patch("/api/v1/pedidos/" + contexto.pedidoId() + "/estado")
+                        .with(conToken(tokenAgricultor(contexto.agricultorId())))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"estado\": \"CANCELADO\"}"))
                 .andExpect(status().isConflict())
@@ -128,9 +148,20 @@ class PedidoControllerTest extends BaseIntegracion {
     }
 
     @Test
+    void cambiarEstadoRechazaComprador() throws Exception {
+        PedidoContexto contexto = crearPedido("77000207", "Papa Estado 2", 20);
+        mockMvc.perform(patch("/api/v1/pedidos/" + contexto.pedidoId() + "/estado")
+                        .with(conToken(contexto.compradorToken()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"estado\": \"ENVIADO\"}"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
     void cambiarEstadoInvalidoRetorna400() throws Exception {
-        long pedidoId = crearPedido("77000204", "Papa Estado", 20);
-        mockMvc.perform(patch("/api/v1/pedidos/" + pedidoId + "/estado")
+        PedidoContexto contexto = crearPedido("77000204", "Papa Estado", 20);
+        mockMvc.perform(patch("/api/v1/pedidos/" + contexto.pedidoId() + "/estado")
+                        .with(conToken(tokenAgricultor(contexto.agricultorId())))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
                 .andExpect(status().isBadRequest())
@@ -139,8 +170,9 @@ class PedidoControllerTest extends BaseIntegracion {
 
     @Test
     void obtenerPedidoRegistradoRetorna200ConItems() throws Exception {
-        long pedidoId = crearPedido("77000205", "Papa Consulta", 20);
-        mockMvc.perform(get("/api/v1/pedidos/" + pedidoId))
+        PedidoContexto contexto = crearPedido("77000205", "Papa Consulta", 20);
+        mockMvc.perform(get("/api/v1/pedidos/" + contexto.pedidoId())
+                        .with(conToken(contexto.compradorToken())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.estado").value("PENDIENTE"))
                 .andExpect(jsonPath("$.pago.medioPago").value("EFECTIVO"))
@@ -149,33 +181,56 @@ class PedidoControllerTest extends BaseIntegracion {
     }
 
     @Test
-    void listarPedidosRetorna200() throws Exception {
-        mockMvc.perform(get("/api/v1/pedidos"))
+    void listarPedidosRetornaSoloLosDelComprador() throws Exception {
+        PedidoContexto contexto = crearPedido("77000208", "Papa Lista", 20);
+        mockMvc.perform(get("/api/v1/pedidos")
+                        .with(conToken(contexto.compradorToken())))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray());
+                .andExpect(jsonPath("$[?(@.id == %d)]".formatted(contexto.pedidoId())).isNotEmpty());
     }
 
     @Test
     void obtenerPedidoInexistenteRetorna404() throws Exception {
-        mockMvc.perform(get("/api/v1/pedidos/999999"))
+        mockMvc.perform(get("/api/v1/pedidos/999999")
+                        .with(conToken(tokenAdmin())))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value(containsString("999999")));
     }
 
-    private long crearPedido(String cedula, String nombreProducto, double cantidad) throws Exception {
+    private PedidoContexto crearPedido(String cedula, String nombreProducto, double cantidad)
+            throws Exception {
         long agricultorId = registrarAgricultor(cedula);
         long productoId = publicarProducto(nombreProducto, "TUBERCULOS", cantidad + 30, "2500", agricultorId);
         long medioPagoId = medioPagoId("EFECTIVO");
+        String compradorToken = tokenComprador(cedula);
         String cuerpo = """
                 {"compradorNombre": "Comprador %s", "medioPagoId": %d,
                  "items": [{"productoId": %d, "cantidad": %s}]}
                 """.formatted(cedula, medioPagoId, productoId, cantidad);
         String respuesta = mockMvc.perform(post("/api/v1/pedidos")
+                        .with(conToken(compradorToken))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(cuerpo))
                 .andExpect(status().isCreated())
                 .andReturn().getResponse().getContentAsString();
-        return objectMapper.readTree(respuesta).get("id").asLong();
+        return new PedidoContexto(objectMapper.readTree(respuesta).get("id").asLong(), compradorToken,
+                agricultorId);
+    }
+
+    private String tokenComprador(String cedula) {
+        return tokenParaUsuario("comprador." + cedula + "@test.co", "Comprador " + cedula);
+    }
+
+    private String tokenParaUsuario(String email, String nombre) {
+        var usuario = usuarioRepository.findByEmail(email)
+                .orElseGet(() -> usuarioRepository.save(
+                        com.agrovalle.agrovalle_connect.usuarios.Usuario.builder()
+                                .nombre(nombre)
+                                .email(email)
+                                .passwordHash(passwordEncoder.encode("Clave1234*"))
+                                .rol(com.agrovalle.agrovalle_connect.usuarios.Rol.COMPRADOR)
+                                .build()));
+        return jwtService.generarToken(usuario);
     }
 
     private long registrarAgricultor(String cedula) throws Exception {
@@ -197,10 +252,14 @@ class PedidoControllerTest extends BaseIntegracion {
                  "unidad": "kg", "fechaCosecha": "%s", "agricultorId": %d}
                 """.formatted(nombre, categoria, cantidad, precio, LocalDate.now().plusDays(5), agricultorId);
         String respuesta = mockMvc.perform(post("/api/v1/productos")
+                        .with(conToken(tokenAgricultor(agricultorId)))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(cuerpo))
                 .andExpect(status().isCreated())
                 .andReturn().getResponse().getContentAsString();
         return objectMapper.readTree(respuesta).get("id").asLong();
+    }
+
+    private record PedidoContexto(long pedidoId, String compradorToken, long agricultorId) {
     }
 }
