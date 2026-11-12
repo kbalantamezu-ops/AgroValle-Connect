@@ -248,6 +248,17 @@ a {
     cursor: not-allowed;
 }
 
+.btn-mini {
+    padding: 0.35rem 0.7rem;
+    font-size: 0.82rem;
+}
+
+.acciones-producto {
+    display: flex;
+    gap: 0.4rem;
+    white-space: nowrap;
+}
+
 /* Títulos de sección */
 .seccion-titulo {
     font-size: 1.5rem;

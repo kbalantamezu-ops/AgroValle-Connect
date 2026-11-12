@@ -4,6 +4,11 @@ import { escapeHtml, fechaHora, moneda, mostrarToast } from './ui.js';
 
 const $ = (selector) => document.querySelector(selector);
 
+let panelActual = null;
+let agricultorActualId = null;
+let productoEditando = null;
+let categoriasCache = null;
+
 function renderizarProductos(productos) {
     if (productos.length === 0) {
         return '<p class="ayuda">Aun no tienes publicaciones.</p>';
@@ -11,7 +16,7 @@ function renderizarProductos(productos) {
     return `
         <table class="tabla">
             <thead><tr><th>Producto</th><th>Categoria</th><th>Cantidad</th>
-                <th>Precio</th><th>Estado</th></tr></thead>
+                <th>Precio</th><th>Estado</th><th>Acciones</th></tr></thead>
             <tbody>
                 ${productos.map((producto) => `
                     <tr>
@@ -20,6 +25,12 @@ function renderizarProductos(productos) {
                         <td>${producto.cantidadDisponible} ${escapeHtml(producto.unidad)}</td>
                         <td>${moneda(producto.precioUnitario)}</td>
                         <td>${producto.disponible ? 'Disponible' : 'Agotado'}</td>
+                        <td class="acciones-producto">
+                            <button class="btn btn-secundario btn-mini" type="button"
+                                data-editar="${producto.id}">Editar</button>
+                            <button class="btn btn-peligro btn-mini" type="button"
+                                data-eliminar="${producto.id}">Eliminar</button>
+                        </td>
                     </tr>`).join('')}
             </tbody>
         </table>`;
@@ -77,6 +88,8 @@ async function cargarPanel(id) {
     $('#contenidoPanel').innerHTML = '<div class="cargando">Cargando panel...</div>';
     try {
         const panel = await api.get(`/agricultores/${id}/panel`);
+        panelActual = panel;
+        agricultorActualId = id;
         renderizarPanel(panel);
     } catch (error) {
         if (error.status === 401) {
@@ -88,7 +101,112 @@ async function cargarPanel(id) {
     }
 }
 
+async function cargarCategorias() {
+    if (categoriasCache) {
+        return categoriasCache;
+    }
+    categoriasCache = await api.get('/catalogo/categorias');
+    const select = $('#eCategoria');
+    select.innerHTML = '';
+    categoriasCache.forEach((categoria) => select.add(new Option(categoria.etiqueta, categoria.nombre)));
+    return categoriasCache;
+}
+
+async function abrirEdicion(id) {
+    const producto = panelActual?.productos.find((p) => p.id === id);
+    if (!producto) {
+        return;
+    }
+    try {
+        await cargarCategorias();
+    } catch (error) {
+        mostrarToast(`No se pudieron cargar las categorias: ${error.message}`, 'error');
+        return;
+    }
+    productoEditando = producto;
+    $('#eNombre').value = producto.nombre;
+    $('#eCategoria').value = producto.categoria;
+    $('#eCantidad').value = producto.cantidadDisponible;
+    $('#eUnidad').value = producto.unidad;
+    $('#ePrecio').value = producto.precioUnitario;
+    $('#eFechaCosecha').value = (producto.fechaCosecha ?? '').slice(0, 10);
+    $('#overlayEditar').classList.add('abierto');
+    $('#eNombre').focus();
+}
+
+function cerrarEdicion() {
+    productoEditando = null;
+    $('#overlayEditar').classList.remove('abierto');
+}
+
+async function guardarEdicion(evento) {
+    evento.preventDefault();
+    if (!productoEditando) {
+        return;
+    }
+    const boton = $('#formEditar button[type="submit"]');
+    boton.disabled = true;
+    const cuerpo = {
+        nombre: $('#eNombre').value.trim(),
+        categoria: $('#eCategoria').value,
+        cantidadDisponible: Number($('#eCantidad').value),
+        precioUnitario: Number($('#ePrecio').value),
+        unidad: $('#eUnidad').value.trim() || 'kg',
+        fechaCosecha: $('#eFechaCosecha').value,
+    };
+    try {
+        const actualizado = await api.put(`/productos/${productoEditando.id}`, cuerpo);
+        mostrarToast(`Producto "${actualizado.nombre}" actualizado`);
+        cerrarEdicion();
+        await cargarPanel(agricultorActualId);
+    } catch (error) {
+        mostrarToast(error.message, 'error');
+    } finally {
+        boton.disabled = false;
+    }
+}
+
+async function eliminarProducto(id) {
+    const producto = panelActual?.productos.find((p) => p.id === id);
+    if (!producto) {
+        return;
+    }
+    const confirmado = window.confirm(
+        `¿Eliminar la publicacion "${producto.nombre}"? Esta accion no se puede deshacer.`);
+    if (!confirmado) {
+        return;
+    }
+    try {
+        await api.delete(`/productos/${id}`);
+        mostrarToast(`Producto "${producto.nombre}" eliminado`);
+        await cargarPanel(agricultorActualId);
+    } catch (error) {
+        mostrarToast(error.message, 'error');
+    }
+}
+
+function manejarAcciones(evento) {
+    const botonEditar = evento.target.closest('[data-editar]');
+    if (botonEditar) {
+        abrirEdicion(Number(botonEditar.dataset.editar));
+        return;
+    }
+    const botonEliminar = evento.target.closest('[data-eliminar]');
+    if (botonEliminar) {
+        eliminarProducto(Number(botonEliminar.dataset.eliminar));
+    }
+}
+
 async function iniciar() {
+    $('#contenidoPanel').addEventListener('click', manejarAcciones);
+    $('#formEditar').addEventListener('submit', guardarEdicion);
+    $('#cerrarEditar').addEventListener('click', cerrarEdicion);
+    $('#overlayEditar').addEventListener('click', (evento) => {
+        if (evento.target === evento.currentTarget) {
+            cerrarEdicion();
+        }
+    });
+
     const usuario = sesion.usuario();
     const select = $('#agricultorPanel');
     const boton = $('#btnCargarPanel');

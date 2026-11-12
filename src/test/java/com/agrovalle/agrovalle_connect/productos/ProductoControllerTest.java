@@ -1,8 +1,10 @@
 package com.agrovalle.agrovalle_connect.productos;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -108,6 +110,159 @@ class ProductoControllerTest extends BaseIntegracion {
                 .andExpect(jsonPath("$.message").value(containsString("999999")));
     }
 
+    @Test
+    void actualizarProductoPropioRetorna200YConservaPropietario() throws Exception {
+        long agricultorId = registrarAgricultor("77000111", "SEVILLA");
+        long otro = registrarAgricultor("77000112", "BUGA");
+        long productoId = publicar("Producto Editable", "FRUTAS", 20, "2500", agricultorId);
+        String cuerpo = """
+                {"nombre": "Producto Editado", "categoria": "VERDURAS", "cantidadDisponible": 35,
+                 "precioUnitario": 3200, "unidad": "kg", "fechaCosecha": "%s", "agricultorId": %d}
+                """.formatted(LocalDate.now().plusDays(5), otro);
+
+        mockMvc.perform(put("/api/v1/productos/" + productoId)
+                        .with(conToken(tokenAgricultor(agricultorId)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(cuerpo))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(productoId))
+                .andExpect(jsonPath("$.nombre").value("Producto Editado"))
+                .andExpect(jsonPath("$.categoria").value("VERDURAS"))
+                .andExpect(jsonPath("$.cantidadDisponible").value(35.0))
+                .andExpect(jsonPath("$.precioUnitario").value(3200.00))
+                .andExpect(jsonPath("$.agricultor.id").value(agricultorId));
+    }
+
+    @Test
+    void actualizarProductoDeOtroAgricultorRetorna403() throws Exception {
+        long agricultorId = registrarAgricultor("77000113", "SEVILLA");
+        long otro = registrarAgricultor("77000114", "BUGA");
+        long productoId = publicar("Producto Ajeno", "FRUTAS", 10, "1000", agricultorId);
+
+        mockMvc.perform(put("/api/v1/productos/" + productoId)
+                        .with(conToken(tokenAgricultor(otro)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(cuerpoEdicion("Intento Ajeno", "FRUTAS", 10, "1000")))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void actualizarProductoInexistenteRetorna404() throws Exception {
+        mockMvc.perform(put("/api/v1/productos/999999")
+                        .with(conToken(tokenAdmin()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(cuerpoEdicion("No Existe", "FRUTAS", 10, "1000")))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value(containsString("999999")));
+    }
+
+    @Test
+    void actualizarSinAutenticacionRetorna401() throws Exception {
+        long agricultorId = registrarAgricultor("77000115", "SEVILLA");
+        long productoId = publicar("Producto Sin Token", "FRUTAS", 10, "1000", agricultorId);
+
+        mockMvc.perform(put("/api/v1/productos/" + productoId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(cuerpoEdicion("Sin Token", "FRUTAS", 10, "1000")))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void actualizarConDatosInvalidosRetorna400() throws Exception {
+        long agricultorId = registrarAgricultor("77000116", "SEVILLA");
+        long productoId = publicar("Producto Invalido", "FRUTAS", 10, "1000", agricultorId);
+
+        mockMvc.perform(put("/api/v1/productos/" + productoId)
+                        .with(conToken(tokenAgricultor(agricultorId)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(cuerpoEdicion("", "FRUTAS", -1, "0")))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.fieldErrors.nombre").exists())
+                .andExpect(jsonPath("$.fieldErrors.cantidadDisponible").exists())
+                .andExpect(jsonPath("$.fieldErrors.precioUnitario").exists());
+    }
+
+    @Test
+    void actualizarCantidadCeroMarcaElProductoComoAgotado() throws Exception {
+        long agricultorId = registrarAgricultor("77000123", "SEVILLA");
+        long productoId = publicar("Producto Agotado", "FRUTAS", 10, "1000", agricultorId);
+
+        mockMvc.perform(put("/api/v1/productos/" + productoId)
+                        .with(conToken(tokenAgricultor(agricultorId)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(cuerpoEdicion("Producto Agotado", "FRUTAS", 0, "1000")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.cantidadDisponible").value(0.0))
+                .andExpect(jsonPath("$.disponible").value(false));
+    }
+
+    @Test
+    void eliminarProductoSinPedidosRetorna204() throws Exception {
+        long agricultorId = registrarAgricultor("77000117", "SEVILLA");
+        long productoId = publicar("Producto Borrable", "FRUTAS", 10, "1000", agricultorId);
+
+        mockMvc.perform(delete("/api/v1/productos/" + productoId)
+                        .with(conToken(tokenAgricultor(agricultorId))))
+                .andExpect(status().isNoContent());
+
+        mockMvc.perform(get("/api/v1/productos/" + productoId))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void eliminarProductoConPedidosAsociadosRetorna409() throws Exception {
+        String cedula = "77000118";
+        long agricultorId = registrarAgricultor(cedula, "SEVILLA");
+        long productoId = publicar("Producto Con Pedido", "FRUTAS", 10, "1000", agricultorId);
+        String cuerpoPedido = """
+                {"compradorNombre": "Comprador Delete", "medioPagoId": %d,
+                 "items": [{"productoId": %d, "cantidad": 2}]}
+                """.formatted(medioPagoId("EFECTIVO"), productoId);
+        mockMvc.perform(post("/api/v1/pedidos")
+                        .with(conToken(tokenComprador()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(cuerpoPedido))
+                .andExpect(status().isCreated());
+
+        mockMvc.perform(delete("/api/v1/productos/" + productoId)
+                        .with(conToken(tokenAgricultor(agricultorId))))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.message").value(containsString("pedidos asociados")));
+
+        mockMvc.perform(get("/api/v1/productos/" + productoId))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void eliminarProductoDeOtroAgricultorRetorna403() throws Exception {
+        long agricultorId = registrarAgricultor("77000119", "SEVILLA");
+        long otro = registrarAgricultor("77000120", "BUGA");
+        long productoId = publicar("Producto Protegido", "FRUTAS", 10, "1000", agricultorId);
+
+        mockMvc.perform(delete("/api/v1/productos/" + productoId)
+                        .with(conToken(tokenAgricultor(otro))))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void eliminarSinAutenticacionRetorna401() throws Exception {
+        long agricultorId = registrarAgricultor("77000121", "SEVILLA");
+        long productoId = publicar("Producto Privado", "FRUTAS", 10, "1000", agricultorId);
+
+        mockMvc.perform(delete("/api/v1/productos/" + productoId))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void adminPuedeEliminarProductoDeCualquierAgricultor() throws Exception {
+        long agricultorId = registrarAgricultor("77000122", "SEVILLA");
+        long productoId = publicar("Producto Admin", "FRUTAS", 10, "1000", agricultorId);
+
+        mockMvc.perform(delete("/api/v1/productos/" + productoId)
+                        .with(conToken(tokenAdmin())))
+                .andExpect(status().isNoContent());
+    }
+
     private long registrarAgricultor(String cedula, String municipio) throws Exception {
         String cuerpo = """
                 {"nombre": "Agricultor Productos", "cedula": "%s", "municipio": "%s"}
@@ -138,5 +293,12 @@ class ProductoControllerTest extends BaseIntegracion {
                  "unidad": "kg", "fechaCosecha": "%s", "agricultorId": %d}
                 """.formatted(nombre, categoria, cantidad, precio,
                 LocalDate.now().plusDays(5), agricultorId);
+    }
+
+    private String cuerpoEdicion(String nombre, String categoria, double cantidad, String precio) {
+        return """
+                {"nombre": "%s", "categoria": "%s", "cantidadDisponible": %s, "precioUnitario": %s,
+                 "unidad": "kg", "fechaCosecha": "%s"}
+                """.formatted(nombre, categoria, cantidad, precio, LocalDate.now().plusDays(5));
     }
 }

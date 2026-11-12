@@ -20,13 +20,22 @@ public class AutorizacionService {
     }
 
     public void exigirPropietarioOAdmin(UsuarioPrincipal principal, Long agricultorId) {
+        exigirPropietario(principal, agricultorId,
+                "Solo puedes gestionar tu propio perfil de agricultor");
+    }
+
+    public void exigirPropietarioProductoOAdmin(UsuarioPrincipal principal, Long agricultorId) {
+        exigirPropietario(principal, agricultorId,
+                "Solo el agricultor dueno del producto o un administrador pueden gestionarlo");
+    }
+
+    private void exigirPropietario(UsuarioPrincipal principal, Long agricultorId, String mensaje) {
         exigirAutenticado(principal);
         if (principal.esAdmin()) {
             return;
         }
         if (!principal.esAgricultor() || !Objects.equals(principal.agricultorId(), agricultorId)) {
-            throw new ApiException(HttpStatus.FORBIDDEN,
-                    "Solo puedes gestionar tu propio perfil de agricultor");
+            throw new ApiException(HttpStatus.FORBIDDEN, mensaje);
         }
     }
 
