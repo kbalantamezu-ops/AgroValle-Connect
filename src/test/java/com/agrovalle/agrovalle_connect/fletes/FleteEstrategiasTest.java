@@ -15,6 +15,8 @@ class FleteEstrategiasTest {
 
     assertEquals("CERCANA", estrategia.zona());
     assertTrue(estrategia.aplicaA("  Palmira "));
+    assertTrue(estrategia.aplicaA("JAMUNDI"));
+    assertTrue(estrategia.aplicaA("Jamundí"));
     assertFalse(estrategia.aplicaA("Tuluá"));
     assertEquals(new BigDecimal("8000.00"), estrategia.calcular(new BigDecimal("10")));
   }
@@ -25,6 +27,7 @@ class FleteEstrategiasTest {
 
     assertEquals("INTERMEDIA", estrategia.zona());
     assertTrue(estrategia.aplicaA("Tuluá"));
+    assertTrue(estrategia.aplicaA("TULUA"));
     assertFalse(estrategia.aplicaA("Cali"));
     assertEquals(new BigDecimal("17000.00"), estrategia.calcular(new BigDecimal("10")));
   }

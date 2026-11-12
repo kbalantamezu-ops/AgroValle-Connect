@@ -12,6 +12,9 @@ public record PedidoResponse(
         String estado,
         LocalDateTime fechaCreacion,
         BigDecimal total,
+        BigDecimal flete,
+        String fleteZona,
+        String municipioDestino,
         List<ItemResponse> items) {
 
     public record PagoResponse(

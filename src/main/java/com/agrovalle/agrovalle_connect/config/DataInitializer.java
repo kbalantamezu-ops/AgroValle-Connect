@@ -107,7 +107,10 @@ public class DataInitializer implements CommandLineRunner {
         pedido.setCompradorTelefono("318 555 0707");
         pedido.setEstado(EstadoPedido.EN_PREPARACION);
         pedido.setFechaCreacion(LocalDateTime.now().minusDays(1));
-        pedido.setTotal(new BigDecimal("31400.00"));
+        pedido.setMunicipioDestino(Municipio.CALI.name());
+        pedido.setFleteZona("CERCANA");
+        pedido.setFleteCosto(new BigDecimal("7500.00"));
+        pedido.setTotal(new BigDecimal("43500.00"));
         pedido.setUsuarioId(compradorDemoId);
         pedido.agregarItem(item(pedido, pina, 8, new BigDecimal("2500.00")));
         pedido.agregarItem(item(pedido, tomate, 5, new BigDecimal("3200.00")));

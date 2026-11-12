@@ -4,6 +4,25 @@ Todos los cambios relevantes del proyecto se documentan en este archivo.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/) y
 [Versionamiento Semántico](https://semver.org/lang/es/).
 
+## [1.2.0] - 2026-11-11
+
+### Agregado
+
+- Cotización de flete en el checkout según el municipio de entrega y el peso total del pedido.
+- `POST /api/v1/pedidos` acepta `municipioDestino`; la respuesta incluye `flete`, `fleteZona` y `municipioDestino`.
+- El total del pedido y el monto del pago incluyen el flete.
+- Reposición automática del stock cuando un pedido pasa a `CANCELADO`.
+- Visualización de subtotal, flete y total en el detalle del pedido.
+
+### Corregido
+
+- La normalización de municipios del flete ahora ignora tildes y mayúsculas, por lo que `TULUA`/`Tuluá` y
+  `JAMUNDI`/`Jamundí` se asignan a la zona correcta.
+
+### Cambiado
+
+- El pedido de ejemplo del perfil de desarrollo ahora incluye flete a Cali y un total consistente con sus ítems.
+
 ## [1.1.0] - 2026-11-11
 
 ### Agregado

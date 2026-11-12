@@ -41,6 +41,15 @@ public class Pedido {
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal total;
 
+    @Column(name = "flete_costo", precision = 12, scale = 2)
+    private BigDecimal fleteCosto;
+
+    @Column(name = "flete_zona", length = 30)
+    private String fleteZona;
+
+    @Column(name = "municipio_destino", length = 30)
+    private String municipioDestino;
+
     @Column(name = "usuario_id")
     private Long usuarioId;
 
@@ -105,6 +114,30 @@ public class Pedido {
 
     public void setTotal(BigDecimal total) {
         this.total = total;
+    }
+
+    public BigDecimal getFleteCosto() {
+        return fleteCosto;
+    }
+
+    public void setFleteCosto(BigDecimal fleteCosto) {
+        this.fleteCosto = fleteCosto;
+    }
+
+    public String getFleteZona() {
+        return fleteZona;
+    }
+
+    public void setFleteZona(String fleteZona) {
+        this.fleteZona = fleteZona;
+    }
+
+    public String getMunicipioDestino() {
+        return municipioDestino;
+    }
+
+    public void setMunicipioDestino(String municipioDestino) {
+        this.municipioDestino = municipioDestino;
     }
 
     public Long getUsuarioId() {

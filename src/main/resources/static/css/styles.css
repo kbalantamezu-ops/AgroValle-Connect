@@ -920,3 +920,29 @@ a {
         font-size: 1.6rem;
     }
 }
+
+/* Resumen de checkout con flete */
+.resumen-checkout {
+    background: var(--verde-50);
+    border: 1px solid var(--verde-100);
+    border-radius: 10px;
+    padding: 0.9rem 1rem;
+    margin: 1rem 0;
+}
+
+.linea-resumen {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.25rem 0;
+    color: var(--gris);
+}
+
+.linea-resumen.total {
+    border-top: 1px solid var(--verde-100);
+    margin-top: 0.4rem;
+    padding-top: 0.6rem;
+    color: var(--verde-800);
+    font-weight: 800;
+    font-size: 1.05rem;
+}

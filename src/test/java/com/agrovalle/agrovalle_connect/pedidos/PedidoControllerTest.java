@@ -22,7 +22,8 @@ class PedidoControllerTest extends BaseIntegracion {
         long medioPagoId = medioPagoId("EFECTIVO");
         String cuerpo = """
                 {"compradorNombre": "Comprador Test", "compradorTelefono": "300 123 4567",
-                 "medioPagoId": %d, "items": [{"productoId": %d, "cantidad": 10}]}
+                 "medioPagoId": %d, "municipioDestino": "CALI",
+                 "items": [{"productoId": %d, "cantidad": 10}]}
                 """.formatted(medioPagoId, productoId);
         mockMvc.perform(post("/api/v1/pedidos")
                         .with(conToken(tokenComprador()))
@@ -31,9 +32,12 @@ class PedidoControllerTest extends BaseIntegracion {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").isNumber())
                 .andExpect(jsonPath("$.estado").value("PENDIENTE"))
-                .andExpect(jsonPath("$.total").value(20000.00))
+                .andExpect(jsonPath("$.total").value(28000.00))
+                .andExpect(jsonPath("$.flete").value(8000.00))
+                .andExpect(jsonPath("$.fleteZona").value("CERCANA"))
+                .andExpect(jsonPath("$.municipioDestino").value("CALI"))
                 .andExpect(jsonPath("$.pago.medioPago").value("EFECTIVO"))
-                .andExpect(jsonPath("$.pago.monto").value(20000.00))
+                .andExpect(jsonPath("$.pago.monto").value(28000.00))
                 .andExpect(jsonPath("$.pago.estado").value("PAGADO"))
                 .andExpect(jsonPath("$.pago.fechaPago").isNotEmpty())
                 .andExpect(jsonPath("$.items[0].productoNombre").value("Yuca Test"))
@@ -73,6 +77,42 @@ class PedidoControllerTest extends BaseIntegracion {
         mockMvc.perform(get("/api/v1/productos/" + productoId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.cantidadDisponible").value(5.0));
+    }
+
+    @Test
+    void crearSinMunicipioDestinoNoCobraFlete() throws Exception {
+        long agricultorId = registrarAgricultor("77000209");
+        long productoId = publicarProducto("Yuca Sin Flete", "TUBERCULOS", 20, "2000", agricultorId);
+        String cuerpo = """
+                {"compradorNombre": "Comprador Test", "medioPagoId": %d,
+                 "items": [{"productoId": %d, "cantidad": 2}]}
+                """.formatted(medioPagoId("EFECTIVO"), productoId);
+        mockMvc.perform(post("/api/v1/pedidos")
+                        .with(conToken(tokenComprador()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(cuerpo))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.flete").value(0.00))
+                .andExpect(jsonPath("$.total").value(4000.00));
+    }
+
+    @Test
+    void cancelarPedidoReponeStock() throws Exception {
+        PedidoContexto contexto = crearPedido("77000210", "Papa Cancela", 10);
+
+        mockMvc.perform(get("/api/v1/productos/" + contexto.productoId()))
+                .andExpect(jsonPath("$.cantidadDisponible").value(30.0));
+
+        mockMvc.perform(patch("/api/v1/pedidos/" + contexto.pedidoId() + "/estado")
+                        .with(conToken(tokenAgricultor(contexto.agricultorId())))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"estado\": \"CANCELADO\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.estado").value("CANCELADO"));
+
+        mockMvc.perform(get("/api/v1/productos/" + contexto.productoId()))
+                .andExpect(jsonPath("$.cantidadDisponible").value(40.0))
+                .andExpect(jsonPath("$.disponible").value(true));
     }
 
     @Test
@@ -214,7 +254,7 @@ class PedidoControllerTest extends BaseIntegracion {
                 .andExpect(status().isCreated())
                 .andReturn().getResponse().getContentAsString();
         return new PedidoContexto(objectMapper.readTree(respuesta).get("id").asLong(), compradorToken,
-                agricultorId);
+                agricultorId, productoId);
     }
 
     private String tokenComprador(String cedula) {
@@ -260,6 +300,7 @@ class PedidoControllerTest extends BaseIntegracion {
         return objectMapper.readTree(respuesta).get("id").asLong();
     }
 
-    private record PedidoContexto(long pedidoId, String compradorToken, long agricultorId) {
+    private record PedidoContexto(long pedidoId, String compradorToken, long agricultorId,
+            long productoId) {
     }
 }

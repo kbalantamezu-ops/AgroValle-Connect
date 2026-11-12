@@ -1,5 +1,6 @@
 package com.agrovalle.agrovalle_connect.pedidos;
 
+import com.agrovalle.agrovalle_connect.catalogo.Municipio;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -15,6 +16,7 @@ public record PedidoRequest(
         String compradorTelefono,
         @NotNull(message = "El medio de pago es obligatorio")
         Long medioPagoId,
+        Municipio municipioDestino,
         @NotEmpty(message = "El pedido debe incluir al menos un producto")
         List<@Valid ItemPedidoRequest> items) {
 }
