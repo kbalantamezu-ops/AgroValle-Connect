@@ -3,7 +3,7 @@
 ![Build Status](https://img.shields.io/github/actions/workflow/status/kbalantamezu-ops/AgroValle-Connect/ci.yml?branch=main&label=build)
 ![Java](https://img.shields.io/badge/Java-17-orange)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.1-brightgreen)
-![Tests](https://img.shields.io/badge/tests-102%20passing-success)
+![Tests](https://img.shields.io/badge/tests-103%20passing-success)
 ![Coverage](https://img.shields.io/badge/coverage-81%25%20instructions-success)
 
 > El badge de build refleja el pipeline de GitHub Actions definido en `.github/workflows/ci.yml`.
@@ -96,6 +96,36 @@ La aplicación queda disponible en `http://localhost:8080`:
 
 La consola de H2 está disponible en `/h2-console` (JDBC URL `jdbc:h2:mem:agrovalle`, usuario `sa`).
 
+### Despliegue en Staging (CD)
+
+El ambiente de preproducción corre en **Render** con PostgreSQL gestionado en **Neon** y se despliega
+automáticamente desde `main` mediante GitHub Actions:
+
+```text
+push a main → ./mvnw clean verify → deploy hook de Render → smoke test /api/v1/estado
+```
+
+El perfil `staging` vive en `src/main/resources/application-staging.yml` y toma toda su configuración
+de variables de entorno:
+
+| Variable | Uso |
+| --- | --- |
+| `SPRING_PROFILES_ACTIVE` | Debe ser `staging` en Render. |
+| `STAGING_DB_URL` | Cadena JDBC de Neon (con `sslmode=require`). |
+| `STAGING_DB_USER` | Rol de PostgreSQL de Staging. |
+| `STAGING_DB_PASSWORD` | Contraseña del rol de Staging. |
+| `JWT_SECRET_KEY` | Secreto HS256 de al menos 32 caracteres. |
+| `APP_SEED_DEMO_DATA` | `true` solo para demos con datos de ejemplo. |
+
+En GitHub Actions deben existir los secretos `STAGING_DB_URL`, `STAGING_DB_USER`,
+`STAGING_DB_PASSWORD`, `JWT_SECRET_KEY` y `DEPLOY_HOOK_URL`. La variable opcional
+`STAGING_APP_URL` (repository variable) habilita el smoke test automático contra Render.
+
+El esquema de Staging se crea con `docs/diseno/schema.sql` en la consola SQL de Neon. Las decisiones
+de arquitectura del despliegue están documentadas en
+[`docs/architecture-decisions/ADR-001-despliegue-staging-paas.md`](docs/architecture-decisions/ADR-001-despliegue-staging-paas.md)
+y la evidencia del laboratorio en [`docs/sprint-3-review.md`](docs/sprint-3-review.md).
+
 ### Variables de entorno
 
 | Variable | Valor por defecto | Descripción |
@@ -131,6 +161,7 @@ La consola de H2 está disponible en `/h2-console` (JDBC URL `jdbc:h2:mem:agrova
 | `GET` | `/auth/me` | Cuenta autenticada |
 | `POST` | `/auth/registro/comprador` | Registro de comprador con cuenta |
 | `POST` | `/auth/registro/agricultor` | Registro de agricultor con cuenta vinculada |
+| `GET` | `/estado` | Health check público usado por el pipeline de Staging |
 
 ### Autenticación y roles
 
@@ -199,11 +230,12 @@ Implementado y verificado:
 - Cálculo de fletes con patrón Strategy, cotización en el checkout y flete incluido en el total del pedido.
 - Autenticación JWT con roles (`ADMIN`, `AGRICULTOR`, `COMPRADOR`), autorización por propiedad y frontend de login.
 - Edición y eliminación de productos con autorización por propietario y bloqueo de borrado cuando hay pedidos asociados.
+- Perfil `staging`, endpoint de salud `/api/v1/estado` y pipeline de despliegue continuo a Render con GitHub Actions.
+- Script de esquema para PostgreSQL en `docs/diseno/schema.sql` y ADR del despliegue en `docs/architecture-decisions/`.
 
 Siguientes pasos recomendados:
 
 - Migraciones de base de datos con Flyway o Liquibase para reemplazar `ddl-auto=update`.
-- Desplegar la aplicación en un entorno público.
 - Concurrencia de stock y paginación de listados.
 
 ## Estrategia de Ramas: GitFlow
