@@ -67,6 +67,28 @@ jobs:
             exit 1
           fi
 
+          case "$STAGING_DB_URL" in
+            jdbc:postgresql://*) ;;
+            *)
+              echo "::error::STAGING_DB_URL debe empezar por jdbc:postgresql:// (Neon entrega postgresql://)."
+              exit 1
+              ;;
+          esac
+
+          if [[ "$STAGING_DB_URL" == *"@"* ]]; then
+            echo "::error::STAGING_DB_URL no debe incluir usuario ni contrasena; usa STAGING_DB_USER y STAGING_DB_PASSWORD."
+            exit 1
+          fi
+
+          if [[ "$STAGING_DB_URL" == *"-pooler"* ]]; then
+            echo "::warning::STAGING_DB_URL usa el endpoint -pooler de Neon; con ddl-auto=update se recomienda el host directo."
+          fi
+
+          if [ "${#JWT_SECRET_KEY}" -lt 32 ]; then
+            echo "::error::JWT_SECRET_KEY debe tener al menos 32 caracteres."
+            exit 1
+          fi
+
       - name: Trigger Staging Deployment Webhook
         env:
           DEPLOY_HOOK_URL: ${{ secrets.DEPLOY_HOOK_URL }}
