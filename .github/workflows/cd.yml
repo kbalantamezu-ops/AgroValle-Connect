@@ -1,0 +1,94 @@
+name: Continuous Deployment (CD) - Staging Pipeline
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cd-staging
+  cancel-in-progress: false
+
+jobs:
+  verify-and-test:
+    name: Verification & Quality Gates (CI)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Make Maven Wrapper executable
+        run: chmod +x mvnw
+
+      - name: Run Linter & Unit Tests with JaCoCo Coverage
+        run: ./mvnw -B clean verify
+
+      - name: Upload JaCoCo HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-report
+          path: target/site/jacoco
+
+  deploy-to-staging:
+    name: Deploy Application to Staging Cloud
+    needs: verify-and-test
+    runs-on: ubuntu-latest
+    environment:
+      name: staging
+      url: ${{ vars.STAGING_APP_URL }}
+    steps:
+      - name: Validate required GitHub Secrets
+        env:
+          STAGING_DB_URL: ${{ secrets.STAGING_DB_URL }}
+          STAGING_DB_USER: ${{ secrets.STAGING_DB_USER }}
+          STAGING_DB_PASSWORD: ${{ secrets.STAGING_DB_PASSWORD }}
+          JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
+          DEPLOY_HOOK_URL: ${{ secrets.DEPLOY_HOOK_URL }}
+        run: |
+          faltantes=0
+          for nombre in STAGING_DB_URL STAGING_DB_USER STAGING_DB_PASSWORD JWT_SECRET_KEY DEPLOY_HOOK_URL; do
+            if [ -z "${!nombre}" ]; then
+              echo "::error::Falta configurar el secreto $nombre en GitHub Actions."
+              faltantes=1
+            fi
+          done
+          if [ "$faltantes" -ne 0 ]; then
+            exit 1
+          fi
+
+      - name: Trigger Staging Deployment Webhook
+        env:
+          DEPLOY_HOOK_URL: ${{ secrets.DEPLOY_HOOK_URL }}
+        run: |
+          echo "Ejecutando despliegue automatico a ambiente Staging..."
+          curl --fail --silent --show-error --retry 3 --retry-delay 5 \
+            -X POST "$DEPLOY_HOOK_URL"
+
+      - name: Smoke test against /api/v1/estado
+        if: ${{ vars.STAGING_APP_URL != '' }}
+        env:
+          STAGING_APP_URL: ${{ vars.STAGING_APP_URL }}
+        run: |
+          echo "Esperando a que Staging responda en $STAGING_APP_URL/api/v1/estado"
+          for intento in $(seq 1 20); do
+            if curl --fail --silent --show-error "$STAGING_APP_URL/api/v1/estado"; then
+              echo
+              echo "Staging respondio correctamente."
+              exit 0
+            fi
+            echo "Intento $intento/20: aun no responde, esperando 15 segundos..."
+            sleep 15
+          done
+          echo "::error::Staging no respondio en 5 minutos."
+          exit 1
