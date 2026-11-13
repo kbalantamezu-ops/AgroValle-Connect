@@ -67,6 +67,7 @@ public class SeguridadConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/", "/*.html", "/css/**", "/js/**", "/favicon.ico",
                                 "/error", "/h2-console/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/estado").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/auth/me").authenticated()
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/usuarios",
