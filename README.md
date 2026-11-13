@@ -84,6 +84,18 @@ También se puede levantar todo con Docker Compose:
 docker compose up --build
 ```
 
+La aplicación queda disponible en `http://localhost:8080`:
+
+| Página | Descripción |
+| --- | --- |
+| `/` | Catálogo con búsqueda inteligente, filtros por municipio/categoría/disponibilidad, precios promedio regionales, carrito de compra, contacto directo con el productor y reseñas. |
+| `/publicar.html` | Registro de agricultores y publicación de productos. |
+| `/pedidos.html` | Consulta del estado de un pedido, línea de tiempo, avance de estado y notificaciones. |
+| `/panel.html` | Panel del agricultor con publicaciones, pedidos recibidos y ventas acumuladas (HU-15). |
+| `/login.html` | Inicio de sesión, registro de compradores y registro de agricultores con cuenta. |
+
+La consola de H2 está disponible en `/h2-console` (JDBC URL `jdbc:h2:mem:agrovalle`, usuario `sa`).
+
 ### Despliegue en Staging (CD)
 
 El ambiente de preproducción corre en **Render** con PostgreSQL gestionado en **Neon** y se despliega
@@ -113,18 +125,6 @@ El esquema de Staging se crea con `docs/diseno/schema.sql` en la consola SQL de 
 de arquitectura del despliegue están documentadas en
 [`docs/architecture-decisions/ADR-001-despliegue-staging-paas.md`](docs/architecture-decisions/ADR-001-despliegue-staging-paas.md)
 y la evidencia del laboratorio en [`docs/sprint-3-review.md`](docs/sprint-3-review.md).
-
-La aplicación queda disponible en `http://localhost:8080`:
-
-| Página | Descripción |
-| --- | --- |
-| `/` | Catálogo con búsqueda inteligente, filtros por municipio/categoría/disponibilidad, precios promedio regionales, carrito de compra, contacto directo con el productor y reseñas. |
-| `/publicar.html` | Registro de agricultores y publicación de productos. |
-| `/pedidos.html` | Consulta del estado de un pedido, línea de tiempo, avance de estado y notificaciones. |
-| `/panel.html` | Panel del agricultor con publicaciones, pedidos recibidos y ventas acumuladas (HU-15). |
-| `/login.html` | Inicio de sesión, registro de compradores y registro de agricultores con cuenta. |
-
-La consola de H2 está disponible en `/h2-console` (JDBC URL `jdbc:h2:mem:agrovalle`, usuario `sa`).
 
 ### Variables de entorno
 
