@@ -4,6 +4,21 @@ Todos los cambios relevantes del proyecto se documentan en este archivo.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/) y
 [Versionamiento Semántico](https://semver.org/lang/es/).
 
+## [1.4.0] - 2026-11-12
+
+### Agregado
+
+- Perfil `staging` en `application-staging.yml` con configuración tomada de variables de entorno.
+- Endpoint público de salud `GET /api/v1/estado` con verificación de la conexión a PostgreSQL.
+- Pipeline de Despliegue Continuo `.github/workflows/cd.yml` que ejecuta los quality gates y dispara el deploy hook de Render.
+- Script `docs/diseno/schema.sql` con el esquema completo de PostgreSQL para Staging.
+- ADR `docs/architecture-decisions/ADR-001-despliegue-staging-paas.md` y evidencia en `docs/sprint-3-review.md`.
+
+### Seguridad
+
+- Las credenciales de Staging se inyectan desde GitHub Secrets y variables de entorno de Render; no se versionan.
+- El pipeline valida la presencia de los cinco secretos obligatorios antes de desplegar.
+
 ## [1.3.0] - 2026-11-11
 
 ### Agregado
