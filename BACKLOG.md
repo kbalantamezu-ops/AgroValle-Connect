@@ -1,3 +1,7 @@
+# Product Backlog de AgroValle Connect
+
+
+
 | ID | Historia de Usuario | MoSCoW | Story Points |
 | --- | --- | --- | --- |
 | HU-01 | Registro de Agricultores | M | 3 |
@@ -188,4 +192,116 @@
 ---
 
 
+
+# Proyección de Sprints
+ 
+**Proyecto:** AgroValle Connect
+**Product Backlog:** 15 Historias de Usuario · 74 Story Points
+**Capacidad por sprint:** entre 8 y 12 Story Points (escala de Fibonacci para la estimación de cada historia)
+ 
+---
+ 
+## 1. Resumen general
+ 
+| Sprint | Historias de Usuario | Story Points | Acumulado | Estado |
+|---|---|---|---|---|
+| Sprint 1 | HU-01, HU-02, HU-12 | 11 | 11 | Realizado |
+| Sprint 2 | HU-04, HU-13 | 10 | 21 | Realizado |
+| Sprint 3 | HU-05, HU-06 | 11 | 32 | Proyectado |
+| Sprint 4 | HU-07, HU-10 | 11 | 43 | Proyectado |
+| Sprint 5 | HU-08, HU-15 | 11 | 54 | Proyectado |
+| Sprint 6 | HU-03, HU-09 | 10 | 64 | Proyectado |
+| Sprint 7 | HU-11, HU-14 | 10 | 74 | Proyectado |
+| **Total** | **15 historias** | **74** | | |
+ 
+Los 7 sprints se mantienen dentro del rango de capacidad de 8 a 12 Story Points, y ninguna historia se repite entre sprints.
+ 
+---
+ 
+## 2. Detalle por sprint
+ 
+### Sprint 1: Registro de agricultores, publicación de productos y registro de usuarios (11 SP)
+ 
+**Sprint Goal:** habilitar el registro de agricultores y usuarios compradores, y la publicación de productos agrícolas.
+ 
+| ID | Historia de Usuario | Prioridad MoSCoW | Story Points |
+|---|---|---|---|
+| HU-01 | Registro de Agricultores | Must Have | 3 |
+| HU-02 | Publicación de Productos | Must Have | 5 |
+| HU-12 | Registro de Usuario | Should Have | 3 |
+| | **Total** | | **11** |
+ 
+### Sprint 2: Filtros y búsqueda del catálogo (10 SP)
+ 
+**Sprint Goal:** permitir a los compradores comparar y encontrar productos por categoría, municipio y disponibilidad.
+ 
+| ID | Historia de Usuario | Prioridad MoSCoW | Story Points |
+|---|---|---|---|
+| HU-04 | Filtro de Categorías y Municipio | Must Have | 5 |
+| HU-13 | Búsqueda Inteligente por Municipio y Disponibilidad | Must Have | 5 |
+| | **Total** | | **10** |
+ 
+### Sprint 3: Contacto directo y medios de pago (11 SP)
+ 
+**Sprint Goal:** permitir que los compradores se comuniquen directamente con los agricultores y realicen pagos por los productos adquiridos.
+ 
+| ID | Historia de Usuario | Prioridad MoSCoW | Story Points |
+|---|---|---|---|
+| HU-05 | Contacto Directo | Must Have | 3 |
+| HU-06 | Medios de Pago | Should Have | 8 |
+| | **Total** | | **11** |
+ 
+### Sprint 4: Transporte y estado de los pedidos (11 SP)
+ 
+**Sprint Goal:** gestionar el transporte de los productos y permitir que los compradores consulten el estado de sus pedidos hasta la entrega.
+ 
+| ID | Historia de Usuario | Prioridad MoSCoW | Story Points |
+|---|---|---|---|
+| HU-07 | Transporte | Should Have | 8 |
+| HU-10 | Consultar el Estado de un Pedido | Must Have | 3 |
+| | **Total** | | **11** |
+ 
+### Sprint 5: Reseñas y panel de gestión del agricultor (11 SP)
+ 
+**Sprint Goal:** permitir que los compradores califiquen su experiencia y ofrecer al agricultor un panel para administrar su actividad comercial.
+ 
+| ID | Historia de Usuario | Prioridad MoSCoW | Story Points |
+|---|---|---|---|
+| HU-08 | Satisfacción y Reseñas | Could Have | 3 |
+| HU-15 | Panel de Gestión para el Agricultor | Could Have | 8 |
+| | **Total** | | **11** |
+ 
+### Sprint 6: Precios regionales y actualización de inventario (10 SP)
+ 
+**Sprint Goal:** permitir consultar los precios de los productos en diferentes regiones y mantener el inventario actualizado tras confirmar una compra.
+ 
+| ID | Historia de Usuario | Prioridad MoSCoW | Story Points |
+|---|---|---|---|
+| HU-03 | Visualización de Precios Regionales | Should Have | 5 |
+| HU-09 | Actualización de Stock tras Confirmación de Pedido | Must Have | 5 |
+| | **Total** | | **10** |
+ 
+### Sprint 7: Carrito de compras y notificaciones (10 SP)
+ 
+**Sprint Goal:** facilitar el proceso de compra con un carrito y notificar a los usuarios los cambios de estado de sus pedidos.
+ 
+| ID | Historia de Usuario | Prioridad MoSCoW | Story Points |
+|---|---|---|---|
+| HU-11 | Agregar Productos al Carrito | Must Have | 5 |
+| HU-14 | Notificaciones de Cambio de Estado del Pedido | Should Have | 5 |
+| | **Total** | | **10** |
+ 
+---
+ 
+## 3. Distribución por prioridad MoSCoW
+ 
+| Prioridad | Historias | Story Points |
+|---|---|---|
+| Must Have | HU-01, HU-02, HU-04, HU-05, HU-09, HU-10, HU-11, HU-13 | 34 |
+| Should Have | HU-03, HU-06, HU-07, HU-12, HU-14 | 29 |
+| Could Have | HU-08, HU-15 | 11 |
+| **Total** | **15 historias** | **74** |
+ 
+---
+ 
 
