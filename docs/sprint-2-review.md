@@ -1,31 +1,25 @@
-# Sprint Review — Sprint 2
-
+# Sprint Review: Sprint 2
+ 
+> Instrucciones para el equipo: reemplacen cada `[COMPLETAR]` con datos reales de su última ejecución y borren esta nota antes de entregar.
+ 
 ## Sprint Goal
-
-Permitir que compradores y productores encuentren la oferta agrícola del Valle del Cauca,
-filtrando el catálogo por categoría y municipio y buscando productos por disponibilidad.
-
+ 
+Permitir que compradores y agricultores encuentren la oferta agrícola del Valle del Cauca, filtrando el catálogo por categoría y municipio y buscando productos por disponibilidad.
+ 
+## Historias del Sprint
+ 
+| ID | Historia de Usuario | Prioridad | Story Points | Estado |
+|---|---|---|---|---|
+| HU-04 | Filtro de Categorías y Municipio | Must Have | 5 | [Completado / Parcial] |
+| HU-13 | Búsqueda Inteligente por Municipio y Disponibilidad | Must Have | 5 | [Completado / Parcial] |
+| | **Total** | | **10** | |
+ 
 ## Incremento Ejecutable
-
-El incremento incluye el catálogo web completo, la búsqueda y los filtros de HU-04 y HU-13,
-los precios promedio regionales, el carrito, la creación de pedidos con descuento de stock,
-las reseñas, las notificaciones y la plataforma web que consume la API REST.
-
-## Historias Completadas
-
-| ID | Historia | Story Points | Estado |
-| --- | --- | --- | --- |
-| HU-03 | Visualización de Precios Regionales | 5 | Completado |
-| HU-04 | Filtro de Categorías y Municipio | 5 | Completado |
-| HU-05 | Contacto Directo | 3 | Completado |
-| HU-06 | Medios de Pago | 8 | Completado |
-| HU-08 | Satisfacción y Reseñas | 3 | Completado |
-| HU-09 | Actualización de Stock | 5 | Completado |
-| HU-10 | Consultar Estado de un Pedido | 3 | Completado |
-| HU-11 | Agregar Productos al Carrito | 5 | Completado |
-| HU-13 | Búsqueda Inteligente | 5 | Completado |
-| HU-14 | Notificaciones de Cambio de Estado | 5 | Completado |
-| HU-15 | Panel de Gestión del Agricultor | 8 | Completado |
+ 
+El equipo desarrolló y verificó los siguientes comportamientos de la API REST:
+ 
+- **HU-04:** consulta del catálogo filtrada por municipio y categoría. Endpoint: `GET /api/v1/productos?municipio=Dagua&categoria=Frutas`, que responde `200 OK` con un arreglo JSON de productos.
+- **HU-13:** búsqueda de productos por municipio de origen y disponibilidad. Endpoint: `[COMPLETAR: ruta real]`. Cada resultado incluye cantidad disponible, precio unitario y datos del agricultor.
 
 ## Evidencias de Calidad
 
@@ -50,6 +44,12 @@ Cobertura JaCoCo: superior al 60%
 4. Consultar el estado y las notificaciones en `/pedidos.html`.
 5. Publicar un agricultor y una cosecha en `/publicar.html`.
 6. Consultar publicaciones, pedidos y ventas en `/panel.html`.
+
+
+## Historias No Incluidas en este Sprint
+ 
+Las demás historias del Product Backlog (HU-03, HU-05, HU-06, HU-07, HU-08, HU-09, HU-10, HU-11, HU-14 y HU-15) permanecen en el backlog y están planificadas para los Sprints 3 al 7, según la proyección de sprints.
+ 
 
 ## Conclusión
 
