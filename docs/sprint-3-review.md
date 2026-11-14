@@ -1,4 +1,6 @@
-# Sprint 3 Review — Despliegue Continuo a Staging
+# Sprint Review: Sprint 3 
+
+## Despliegue Continuo a Staging
 
 **Fecha:** 2026-11-12
 **Objetivo:** Publicar AgroValle Connect en un ambiente de Staging en la nube y automatizar el despliegue desde la rama `main`.
