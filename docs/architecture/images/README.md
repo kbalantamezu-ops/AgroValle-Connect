@@ -2,8 +2,8 @@
 
 Diagramas de diseño del proyecto en formato **Markdown + Mermaid**, listos para
 visualizarse en GitHub, GitLab, VS Code o [mermaid.live](https://mermaid.live).
-Las imágenes originales se conservan en esta misma carpeta
-([`docs/architecture/images`](.)) como evidencia del proceso de diseño.
+Las imágenes originales (`.png`) se conservan en esta misma carpeta como evidencia
+del proceso de diseño.
 
 ## Índice
 
