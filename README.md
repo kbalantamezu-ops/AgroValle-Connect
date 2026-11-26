@@ -61,6 +61,13 @@ src/main/java/com/agrovalle/agrovalle_connect/
 └── usuarios/       # Registro de compradores
 ```
 
+### Diagramas de diseño
+
+Los diagramas de componentes, despliegue, secuencia, entidad-relación y capas MVC
+están en [`docs/diagramas-uml/`](docs/diagramas-uml/README.md), en formato
+Markdown + Mermaid para que se rendericen directamente en GitHub y evolucionen
+junto con el código.
+
 ## Cómo ejecutar
 
 ```bash
