@@ -59,5 +59,5 @@ flowchart TB
 3. Las reglas de negocio viven en los servicios para poder probarlas con JUnit
    sin levantar la base de datos.
 
-> Fuente original: `docs/diseno/diagrama-componentes (1).png` y
-> [`docs/diseno/arquitectura-mvc-gof.md`](../diseno/arquitectura-mvc-gof.md).
+> Fuente original: `docs/architecture/images/diagrama-componentes (1).png` y
+> [`docs/architecture/arquitectura-mvc-gof.md`](../arquitectura-mvc-gof.md).

@@ -186,6 +186,6 @@ laboratorio de Despliegue Continuo (tablas `agricultores`, `usuarios`, `producto
 `pedidos`, `items_pedido`, `pagos`, etc.). El DER de este documento es el modelo de
 diseño completo y canónico.
 
-> Fuente original: `docs/diseno/modelo-entidad-relacion.png` y
-> [`docs/diseno/modelo-datos-der.png`](../diseno/modelo-datos-der.png).
-> Ver también [`docs/diseno/modelo-datos.md`](../diseno/modelo-datos.md).
+> Fuente original: `docs/architecture/images/modelo-entidad-relacion.png` y
+> [`docs/architecture/images/modelo-datos-der.png`](modelo-datos-der.png).
+> Ver también [`docs/diseno/modelo-datos.md`](../../diseno/modelo-datos.md).

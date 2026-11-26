@@ -42,5 +42,5 @@ flowchart LR
 > Los servicios gratuitos de Render se suspenden por inactividad: el primer request
 > puede tardar entre 30 y 60 segundos.
 
-> Fuente original: `docs/diseno/diagrama-despliegue (1).png` y
-> [`docs/sprint-3-review.md`](../sprint-3-review.md).
+> Fuente original: `docs/architecture/images/diagrama-despliegue (1).png` y
+> [`sprints/sprint-3/sprint-3-review.md`](../../../sprints/sprint-3/sprint-3-review.md).

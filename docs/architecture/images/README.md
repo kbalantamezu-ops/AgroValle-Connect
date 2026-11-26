@@ -2,18 +2,18 @@
 
 Diagramas de diseño del proyecto en formato **Markdown + Mermaid**, listos para
 visualizarse en GitHub, GitLab, VS Code o [mermaid.live](https://mermaid.live).
-Las imágenes originales se conservan en [`docs/diseno`](../diseno) como evidencia
-del proceso de diseño.
+Las imágenes originales se conservan en esta misma carpeta
+([`docs/architecture/images`](.)) como evidencia del proceso de diseño.
 
 ## Índice
 
 | # | Diagrama | Archivo | Tipo | Imagen original |
 | --- | --- | --- | --- | --- |
-| 1 | Componentes | [`01-componentes.md`](01-componentes.md) | UML · Componentes | `docs/diseno/diagrama-componentes (1).png` |
-| 2 | Despliegue | [`02-despliegue.md`](02-despliegue.md) | UML · Despliegue | `docs/diseno/diagrama-despliegue (1).png` |
-| 3 | Secuencia | [`03-secuencia.md`](03-secuencia.md) | UML · Secuencia | `docs/diseno/diagrama-secuencia (1).png` |
-| 4 | Entidad-Relación | [`04-entidad-relacion.md`](04-entidad-relacion.md) | Modelo de datos (DER) | `docs/diseno/modelo-entidad-relacion.png` |
-| 5 | Arquitectura en capas | [`05-arquitectura-capas.md`](05-arquitectura-capas.md) | UML · Paquetes / capas | `docs/diseno/arquitectura-mvc-gof.md` |
+| 1 | Componentes | [`01-componentes.md`](01-componentes.md) | UML · Componentes | `docs/architecture/images/diagrama-componentes (1).png` |
+| 2 | Despliegue | [`02-despliegue.md`](02-despliegue.md) | UML · Despliegue | `docs/architecture/images/diagrama-despliegue (1).png` |
+| 3 | Secuencia | [`03-secuencia.md`](03-secuencia.md) | UML · Secuencia | `docs/architecture/images/diagrama-secuencia (1).png` |
+| 4 | Entidad-Relación | [`04-entidad-relacion.md`](04-entidad-relacion.md) | Modelo de datos (DER) | `docs/architecture/images/modelo-entidad-relacion.png` |
+| 5 | Arquitectura en capas | [`05-arquitectura-capas.md`](05-arquitectura-capas.md) | UML · Paquetes / capas | `docs/architecture/arquitectura-mvc-gof.md` |
 
 ## Cómo visualizarlos
 

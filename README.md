@@ -64,7 +64,7 @@ src/main/java/com/agrovalle/agrovalle_connect/
 ### Diagramas de diseño
 
 Los diagramas de componentes, despliegue, secuencia, entidad-relación y capas MVC
-están en [`docs/diagramas-uml/`](docs/diagramas-uml/README.md), en formato
+están en [`docs/architecture/images/`](docs/architecture/images/README.md), en formato
 Markdown + Mermaid para que se rendericen directamente en GitHub y evolucionen
 junto con el código.
 
@@ -131,7 +131,7 @@ En GitHub Actions deben existir los secretos `STAGING_DB_URL`, `STAGING_DB_USER`
 El esquema de Staging se crea con `docs/diseno/schema.sql` en la consola SQL de Neon. Las decisiones
 de arquitectura del despliegue están documentadas en
 [`docs/architecture-decisions/ADR-001-despliegue-staging-paas.md`](docs/architecture-decisions/ADR-001-despliegue-staging-paas.md)
-y la evidencia del laboratorio en [`docs/sprint-3-review.md`](docs/sprint-3-review.md).
+y la evidencia del laboratorio en [`sprints/sprint-3/sprint-3-review.md`](sprints/sprint-3/sprint-3-review.md).
 
 ### Variables de entorno
 

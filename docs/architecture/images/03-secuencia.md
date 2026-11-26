@@ -48,4 +48,4 @@ sequenceDiagram
 - El servicio aplica las reglas de negocio antes de persistir: unicidad de cédula
   y correo, cifrado BCrypt, fechas válidas, precio positivo y stock no negativo.
 
-> Fuente original: `docs/diseno/diagrama-secuencia (1).png`.
+> Fuente original: `docs/architecture/images/diagrama-secuencia (1).png`.

@@ -56,7 +56,7 @@ conexión con la base de datos.
 
 | Acción | Responsable | Estado |
 | --- | --- | --- |
-| Convertir los diagramas de diseño a Markdown/Mermaid en `docs/diagramas-uml/` | Equipo | Completado |
+| Convertir los diagramas de diseño a Markdown/Mermaid en `docs/architecture/images/` | Equipo | Completado |
 | Documentar la retrospectiva del Sprint 3 | Equipo | Completado |
 | Agregar la captura del `200 OK` de Staging al `sprint-3-review.md` | Equipo | Pendiente |
 | Configurar `STAGING_APP_URL` para habilitar el smoke test automático | Equipo | Pendiente |

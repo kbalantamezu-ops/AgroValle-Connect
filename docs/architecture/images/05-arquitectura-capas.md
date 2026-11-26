@@ -38,4 +38,4 @@ com.agrovalle.agrovalle_connect
 4. Las reglas de negocio viven solo en el servicio para poder probarlas con JUnit
    sin levantar la base de datos.
 
-> Fuente original: [`docs/diseno/arquitectura-mvc-gof.md`](../diseno/arquitectura-mvc-gof.md).
+> Fuente original: [`docs/architecture/arquitectura-mvc-gof.md`](../arquitectura-mvc-gof.md).

@@ -12,9 +12,9 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/) y
 - Endpoint público de salud `GET /api/v1/estado` con verificación de la conexión a PostgreSQL.
 - Pipeline de Despliegue Continuo `.github/workflows/cd.yml` que ejecuta los quality gates y dispara el deploy hook de Render.
 - Script `docs/diseno/schema.sql` con el esquema completo de PostgreSQL para Staging.
-- ADR `docs/architecture-decisions/ADR-001-despliegue-staging-paas.md` y evidencia en `docs/sprint-3-review.md`.
-- Retrospectiva del Sprint 3 en `docs/sprint-3-retrospective.md`.
-- Diagramas de diseño en formato Markdown/Mermaid dentro de `docs/diagramas-uml/`: componentes, despliegue, secuencia, entidad-relación y arquitectura en capas.
+- ADR `docs/architecture-decisions/ADR-001-despliegue-staging-paas.md` y evidencia en `sprints/sprint-3/sprint-3-review.md`.
+- Retrospectiva del Sprint 3 en `sprints/sprint-3/sprint-3-retrospective.md`.
+- Diagramas de diseño en formato Markdown/Mermaid dentro de `docs/architecture/images/`: componentes, despliegue, secuencia, entidad-relación y arquitectura en capas.
 
 ### Seguridad
 

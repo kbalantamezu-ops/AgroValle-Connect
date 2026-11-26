@@ -68,7 +68,7 @@ El esquema de Staging se crea con `docs/diseno/schema.sql` en la consola SQL de 
 
 * **ISO/IEC 25010 — Mantenibilidad:** la configuración por perfiles elimina valores fijos del código y permite cambiar de entorno sin recompilar.
 * **ISO/IEC 25010 — Seguridad:** las credenciales no se versionan; se inyectan en tiempo de ejecución.
-* **DoD del laboratorio:** perfil `application-staging.yml`, secretos obligatorios, pipeline `cd.yml`, ADR y evidencia en `docs/sprint-3-review.md`.
+* **DoD del laboratorio:** perfil `application-staging.yml`, secretos obligatorios, pipeline `cd.yml`, ADR y evidencia en `sprints/sprint-3/sprint-3-review.md`.
 
 ## Referencias
 
